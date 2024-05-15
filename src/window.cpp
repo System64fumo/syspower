@@ -7,6 +7,8 @@
 #include <string>
 #include <iomanip>
 #include <gtk4-layer-shell.h>
+#include <gtkmm/cssprovider.h>
+#include <filesystem>
 
 std::string action_type;
 
@@ -50,6 +52,7 @@ void thread() {
 }
 
 syspower::syspower() {
+	// Layer shell stuff
 	gtk_layer_init_for_window(gobj());
 	gtk_layer_set_namespace(gobj(), "syspower");
 	gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_TOP);
@@ -60,49 +63,55 @@ syspower::syspower() {
 	gtk_layer_set_anchor(gobj(), GTK_LAYER_SHELL_EDGE_TOP, true);
 	gtk_layer_set_anchor(gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
 
-	// Set window title
+	// Initialization
 	set_title("Power Menu");
-
-	// Set window size
 	set_default_size(200, 100);
-
-	// Add the button to the window
 	set_child(box_layout);
+	show();
 
 	// TODO: Add customization options for this.
+	box_layout.get_style_context()->add_class("box_layout");
 	box_layout.property_orientation().set_value(Gtk::Orientation::VERTICAL);
-	box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
 	box_layout.set_valign(Gtk::Align::CENTER);
 	box_layout.set_halign(Gtk::Align::CENTER);
+
+	box_buttons.get_style_context()->add_class("box_buttons");
+	box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+	box_buttons.set_halign(Gtk::Align::CENTER);
 
 	box_layout.append(label_status);
 	box_layout.append(box_buttons);
 	box_layout.append(progressbar_sync);
-	box_buttons.set_halign(Gtk::Align::CENTER);
 
 	// TODO: Idk but i feel like adding a revealer to box_buttons would make 
 	// showing the bar a little fancier?
+	label_status.get_style_context()->add_class("label_status");
 	label_status.set_margin(10);
+	progressbar_sync.get_style_context()->add_class("progressbar_sync");
 	progressbar_sync.set_size_request(300, -1);
 	progressbar_sync.set_visible(false);
 
 	// Button shenanigans
 	box_buttons.append(button_shutdown);
+	button_shutdown.get_style_context()->add_class("button_shutdown");
 	button_shutdown.set_size_request(300, 75);
 	button_shutdown.set_label("Shutdown");
 	button_shutdown.set_margin(5);
 
 	box_buttons.append(button_reboot);
+	button_reboot.get_style_context()->add_class("button_reboot");
 	button_reboot.set_size_request(300, 75);
 	button_reboot.set_label("Reboot");
 	button_reboot.set_margin(5);
 
 	box_buttons.append(button_logout);
+	button_logout.get_style_context()->add_class("button_logout");
 	button_logout.set_size_request(300, 75);
 	button_logout.set_label("Logout");
 	button_logout.set_margin(5);
 
 	box_buttons.append(button_cancel);
+	button_cancel.get_style_context()->add_class("button_cancel");
 	button_cancel.set_size_request(300, 75);
 	button_cancel.set_label("Cancel");
 	button_cancel.set_margin(5);
@@ -113,7 +122,16 @@ syspower::syspower() {
 	button_logout.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_logout_clicked));
 	button_cancel.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_cancel_clicked));
 
-	show();
+	// Load custom css
+	std::string home_dir = getenv("HOME");
+	std::string css_path = home_dir + "/.config/sys64/power.css";
+
+	if (!std::filesystem::exists(css_path)) return;
+
+	auto css = Gtk::CssProvider::create();
+	css->load_from_path(css_path);
+	auto style_context = get_style_context();
+	style_context->add_provider_for_display(property_display(), css, GTK_STYLE_PROVIDER_PRIORITY_USER);
 }
 
 // TODO: Fix this horrible mess, learn to use dynamic casting or something idk.
