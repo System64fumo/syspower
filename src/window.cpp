@@ -1,5 +1,6 @@
 #include "window.hpp"
 #include "main.hpp"
+#include "config.hpp"
 
 #include <thread>
 #include <iostream>
@@ -28,6 +29,10 @@ void thread() {
 		strcpy(command, "loginctl logout");
 		win->label_status.set_label("Logging out...");
 	}
+
+	// Set proper layout
+	win->box_layout.set_valign(Gtk::Align::CENTER);
+	win->box_layout.set_halign(Gtk::Align::CENTER);
 
 	// TODO: Give a visual indicator that stuff is going on, Add a spinner.
 	win->box_buttons.set_visible(false);
@@ -69,14 +74,36 @@ syspower::syspower() {
 	set_child(box_layout);
 	show();
 
-	// TODO: Add customization options for this.
 	box_layout.get_style_context()->add_class("box_layout");
 	box_layout.property_orientation().set_value(Gtk::Orientation::VERTICAL);
-	box_layout.set_valign(Gtk::Align::CENTER);
-	box_layout.set_halign(Gtk::Align::CENTER);
+
+	switch (position) {
+		case 0: // Top
+			box_layout.set_valign(Gtk::Align::START);
+			box_layout.set_halign(Gtk::Align::CENTER);
+			break;
+		case 1: // Right
+			box_layout.set_valign(Gtk::Align::CENTER);
+			box_layout.set_halign(Gtk::Align::END);
+			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			break;
+		case 2: // Bottom
+			box_layout.set_valign(Gtk::Align::END);
+			box_layout.set_halign(Gtk::Align::CENTER);
+			break;
+		case 3: // Left
+			box_layout.set_valign(Gtk::Align::CENTER);
+			box_layout.set_halign(Gtk::Align::START);
+			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			break;
+		case 4: // Centered
+			box_layout.set_valign(Gtk::Align::CENTER);
+			box_layout.set_halign(Gtk::Align::CENTER);
+			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			break;
+	}
 
 	box_buttons.get_style_context()->add_class("box_buttons");
-	box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
 	box_buttons.set_halign(Gtk::Align::CENTER);
 
 	box_layout.append(label_status);
