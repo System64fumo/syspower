@@ -4,6 +4,6 @@
 inline Glib::RefPtr<Gtk::Application> app;
 int get_dirty_pages();
 void sync_filesystems();
-void print_child_processes();
+void kill_child_processes();
 
 #endif

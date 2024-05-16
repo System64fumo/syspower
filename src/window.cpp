@@ -39,9 +39,7 @@ void thread() {
 	win->progressbar_sync.set_visible(true);
 	win->max_slider_value = get_dirty_pages();
 
-	// Start killing children (Scary)
-	// For now this only prints them (Boring)
-	print_child_processes();
+	kill_child_processes();
 
 	// Sync filesystems
 	win->timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*win, &syspower::on_timer_tick), 50);
