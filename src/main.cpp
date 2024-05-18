@@ -2,6 +2,7 @@
 #include "main.hpp"
 #include "config.hpp"
 
+#include <iostream>
 #include <getopt.h>
 
 int main(int argc, char *argv[]) {
@@ -15,11 +16,11 @@ int main(int argc, char *argv[]) {
 
 			case 'h':
 			default :
-				printf("usage:\n");
-				printf("  syspower [argument...]:\n\n");
-				printf("arguments:\n");
-				printf("  -p	Set position\n");
-				printf("  -h	Show this help message\n");
+				std::cout << "usage:" << std::endl;
+				std::cout << "  syspower [argument...]:\n" << std::endl;
+				std::cout << "arguments:" << std::endl;
+				std::cout << "  -p	Set position" << std::endl;
+				std::cout << "  -h	Show this help message" << std::endl;
 				return 0;
 
 			case -1:
