@@ -26,7 +26,7 @@ void thread() {
 		win->label_status.set_label("Rebooting...");
 	}
 	else if (action_type == "logout") {
-		strcpy(command, "loginctl logout");
+		strcpy(command, "loginctl terminate-user $USER");
 		win->label_status.set_label("Logging out...");
 	}
 
