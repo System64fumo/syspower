@@ -14,7 +14,7 @@
 std::string action_type;
 
 void thread() {
-	char command[20] = "";
+	char command[30] = "";
 
 	// Figure out what we're doing
 	if (action_type == "shutdown") {
@@ -30,14 +30,22 @@ void thread() {
 		win->label_status.set_label("Logging out...");
 	}
 
+	// Revealer
+	win->revealer_box.set_reveal_child(false);
+	usleep(1000 * 1000);
+	win->revealer_box.set_visible(false);
+
 	// Set proper layout
 	win->box_layout.set_valign(Gtk::Align::CENTER);
 	win->box_layout.set_halign(Gtk::Align::CENTER);
 
-	// TODO: Give a visual indicator that stuff is going on, Add a spinner.
-	win->box_buttons.set_visible(false);
+	win->label_status.set_visible(true);
 	win->progressbar_sync.set_visible(true);
 	win->max_slider_value = get_dirty_pages();
+
+	// TODO: Add a dynamic class based on progress
+	// Will be useful for custom css where the screen gets dimmer
+	// based on progress.
 
 	kill_child_processes();
 
@@ -57,6 +65,7 @@ void thread() {
 syspower::syspower() {
 	// Layer shell stuff
 	gtk_layer_init_for_window(gobj());
+	gtk_layer_set_keyboard_mode(gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND);
 	gtk_layer_set_namespace(gobj(), "syspower");
 	gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_TOP);
 
@@ -75,29 +84,36 @@ syspower::syspower() {
 	box_layout.get_style_context()->add_class("box_layout");
 	box_layout.property_orientation().set_value(Gtk::Orientation::VERTICAL);
 
+	Gtk::RevealerTransitionType transition_type = Gtk::RevealerTransitionType::SLIDE_UP;
+
 	switch (position) {
 		case 0: // Top
 			box_layout.set_valign(Gtk::Align::START);
 			box_layout.set_halign(Gtk::Align::CENTER);
+			transition_type = Gtk::RevealerTransitionType::SLIDE_DOWN;
 			break;
 		case 1: // Right
 			box_layout.set_valign(Gtk::Align::CENTER);
 			box_layout.set_halign(Gtk::Align::END);
 			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			transition_type = Gtk::RevealerTransitionType::SLIDE_LEFT;
 			break;
 		case 2: // Bottom
 			box_layout.set_valign(Gtk::Align::END);
 			box_layout.set_halign(Gtk::Align::CENTER);
+			transition_type = Gtk::RevealerTransitionType::SLIDE_UP;
 			break;
 		case 3: // Left
 			box_layout.set_valign(Gtk::Align::CENTER);
 			box_layout.set_halign(Gtk::Align::START);
 			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			transition_type = Gtk::RevealerTransitionType::SLIDE_RIGHT;
 			break;
 		case 4: // Centered
 			box_layout.set_valign(Gtk::Align::CENTER);
 			box_layout.set_halign(Gtk::Align::CENTER);
 			box_buttons.property_orientation().set_value(Gtk::Orientation::VERTICAL);
+			transition_type = Gtk::RevealerTransitionType::SLIDE_UP;
 			break;
 	}
 
@@ -105,13 +121,20 @@ syspower::syspower() {
 	box_buttons.set_halign(Gtk::Align::CENTER);
 
 	box_layout.append(label_status);
-	box_layout.append(box_buttons);
+	box_layout.append(revealer_box);
 	box_layout.append(progressbar_sync);
 
-	// TODO: Idk but i feel like adding a revealer to box_buttons would make 
-	// showing the bar a little fancier?
+	// Revealer
+	revealer_box.set_child(box_buttons);
+	revealer_box.set_transition_type(transition_type);
+	revealer_box.set_transition_duration(0);
+	revealer_box.set_reveal_child(true);
+	revealer_box.set_transition_duration(1000);
+	// TODO: Maybe make the transition duration configurable?
+
 	label_status.get_style_context()->add_class("label_status");
 	label_status.set_margin(10);
+	label_status.set_visible(false);
 	progressbar_sync.get_style_context()->add_class("progressbar_sync");
 	progressbar_sync.set_size_request(300, -1);
 	progressbar_sync.set_visible(false);
