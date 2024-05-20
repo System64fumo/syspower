@@ -18,11 +18,23 @@ void thread() {
 
 	// Figure out what we're doing
 	if (action_type == "shutdown") {
-		strcpy(command, "loginctl poweroff");
+		if (access("/bin/systemctl", F_OK) != -1)
+			// Systemd-logind
+			strcpy(command, "systemctl poweroff");
+		else
+			// Elogind
+			strcpy(command, "loginctl poweroff");
+
 		win->label_status.set_label("Shutting down...");
 	}
 	else if (action_type == "reboot") {
-		strcpy(command, "loginctl reboot");
+		if (access("/bin/systemctl", F_OK) != -1)
+			// Systemd-logind
+			strcpy(command, "systemctl reboot");
+		else
+			// Elogind
+			strcpy(command, "loginctl reboot");
+
 		win->label_status.set_label("Rebooting...");
 	}
 	else if (action_type == "logout") {
