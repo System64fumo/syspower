@@ -10,6 +10,7 @@ class syspower : public Gtk::Window {
 		Gtk::Label label_status;
 		Gtk::ProgressBar progressbar_sync;
 		Gtk::Box box_layout;
+		Gtk::Revealer revealer_box;
 		Gtk::Box box_buttons;
 
 		sigc::connection timer_connection;
