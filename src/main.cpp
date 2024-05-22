@@ -9,13 +9,17 @@ int main(int argc, char *argv[]) {
 
 	// Read launch arguments
 	while (true) {
-		switch(getopt(argc, argv, "p:dm:dh")) {
+		switch(getopt(argc, argv, "p:dm:dt:dh")) {
 			case 'p':
 				position = std::stoi(optarg);
 				continue;
 
 			case 'm':
 				main_monitor = std::stoi(optarg);
+				continue;
+
+			case 't':
+				transition_duration = std::stoi(optarg);
 				continue;
 
 			case 'h':
@@ -25,6 +29,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "arguments:" << std::endl;
 				std::cout << "  -p	Set position" << std::endl;
 				std::cout << "  -m	Set primary monitor" << std::endl;
+				std::cout << "  -t	Set revealer transition duration" << std::endl;
 				std::cout << "  -h	Show this help message" << std::endl;
 				return 0;
 
