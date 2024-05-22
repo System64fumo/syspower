@@ -44,7 +44,7 @@ void thread() {
 
 	// Revealer
 	win->revealer_box.set_reveal_child(false);
-	usleep(1000 * 1000);
+	usleep(transition_duration * 1000);
 	win->revealer_box.set_visible(false);
 
 	// Set proper layout
@@ -172,8 +172,7 @@ syspower::syspower() {
 	revealer_box.set_transition_type(transition_type);
 	revealer_box.set_transition_duration(0);
 	revealer_box.set_reveal_child(true);
-	revealer_box.set_transition_duration(1000);
-	// TODO: Maybe make the transition duration configurable?
+	revealer_box.set_transition_duration(transition_duration);
 
 	label_status.get_style_context()->add_class("label_status");
 	label_status.set_margin(10);
