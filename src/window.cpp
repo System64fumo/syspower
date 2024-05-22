@@ -74,6 +74,37 @@ void thread() {
 	system(command);
 }
 
+void syspower::show_other_windows() {
+	// Get all monitors
+	display = gdk_display_get_default();
+	monitors = gdk_display_get_monitors(display);
+	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, main_monitor)));
+
+	int monitorCount = g_list_model_get_n_items(monitors);
+	for (int i = 0; i < monitorCount; ++i) {
+		// Ignore primary monitor
+		if (i == main_monitor)
+			continue;
+
+		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
+
+		// Create empty windows
+		Gtk::Window *window = new Gtk::Window();
+		app->add_window(*window);
+
+		// Layer shell stuff
+		gtk_layer_init_for_window(window->gobj());
+		gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_RIGHT, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_TOP, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
+		gtk_layer_set_monitor(window->gobj(), monitor);
+
+		window->show();
+	}
+}
+
 syspower::syspower() {
 	// Layer shell stuff
 	gtk_layer_init_for_window(gobj());
