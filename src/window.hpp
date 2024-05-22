@@ -18,6 +18,7 @@ class syspower : public Gtk::Window {
 		double max_slider_value;
 
 		bool on_timer_tick();
+		void show_other_windows();
 		syspower();
 	
 	private:
@@ -27,6 +28,8 @@ class syspower : public Gtk::Window {
 		Gtk::Button button_cancel;
 
 		std::thread thread_action;
+		GdkDisplay *display;
+		GListModel *monitors;
 
 		void button_shutdown_clicked();
 		void button_reboot_clicked();
