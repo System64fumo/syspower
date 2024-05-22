@@ -12,14 +12,26 @@ int main(int argc, char *argv[]) {
 		switch(getopt(argc, argv, "p:dm:dt:dh")) {
 			case 'p':
 				position = std::stoi(optarg);
+				if (position > 4 || position < 0) {
+					std::cerr << "Invalid position value" << std::endl;
+					return 1;
+				}
 				continue;
 
 			case 'm':
 				main_monitor = std::stoi(optarg);
+				if (main_monitor < 0) {
+					std::cerr << "Invalid primary monitor value" << std::endl;
+					return 1;
+				}
 				continue;
 
 			case 't':
 				transition_duration = std::stoi(optarg);
+				if (transition_duration < 0 || position < 0) {
+					std::cerr << "Invalid transition duration value" << std::endl;
+					return 1;
+				}
 				continue;
 
 			case 'h':

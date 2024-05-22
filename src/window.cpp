@@ -85,6 +85,12 @@ void syspower::show_other_windows() {
 	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, main_monitor)));
 
 	int monitorCount = g_list_model_get_n_items(monitors);
+
+	if (main_monitor >= monitorCount) {
+		std::cerr << "Invalid primary monitor value" << std::endl;
+		app->quit();
+	}
+
 	for (int i = 0; i < monitorCount; ++i) {
 		// Ignore primary monitor
 		if (i == main_monitor)
