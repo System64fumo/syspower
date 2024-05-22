@@ -43,9 +43,13 @@ void thread() {
 	}
 
 	// Revealer
-	win->revealer_box.set_reveal_child(false);
-	usleep(transition_duration * 1000);
-	win->revealer_box.set_visible(false);
+	if (transition_duration != 0) {
+		win->revealer_box.set_reveal_child(false);
+		usleep(transition_duration * 1000);
+		win->revealer_box.set_visible(false);
+	}
+	else
+		win->box_buttons.set_visible(false);
 
 	// Set proper layout
 	win->box_layout.set_valign(Gtk::Align::CENTER);
@@ -94,6 +98,7 @@ void syspower::show_other_windows() {
 
 		// Layer shell stuff
 		gtk_layer_init_for_window(window->gobj());
+		gtk_layer_set_namespace(gobj(), "syspower_empty_window");
 		gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
 		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
 		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_RIGHT, true);
@@ -120,6 +125,7 @@ syspower::syspower() {
 
 	// Initialization
 	set_title("Power Menu");
+	add_css_class("primary_window");
 	set_default_size(200, 100);
 	set_child(box_layout);
 	show();
@@ -164,15 +170,19 @@ syspower::syspower() {
 	box_buttons.set_halign(Gtk::Align::CENTER);
 
 	box_layout.append(label_status);
-	box_layout.append(revealer_box);
-	box_layout.append(progressbar_sync);
 
 	// Revealer
-	revealer_box.set_child(box_buttons);
-	revealer_box.set_transition_type(transition_type);
-	revealer_box.set_transition_duration(0);
-	revealer_box.set_reveal_child(true);
-	revealer_box.set_transition_duration(transition_duration);
+	if (transition_duration != 0) {
+		box_layout.append(revealer_box);
+		revealer_box.set_child(box_buttons);
+		revealer_box.set_transition_type(transition_type);
+		revealer_box.set_transition_duration(0);
+		revealer_box.set_reveal_child(true);
+		revealer_box.set_transition_duration(transition_duration);
+	}
+	else
+		box_layout.append(box_buttons);
+	box_layout.append(progressbar_sync);
 
 	label_status.get_style_context()->add_class("label_status");
 	label_status.set_margin(10);
