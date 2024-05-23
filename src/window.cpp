@@ -11,8 +11,6 @@
 #include <gtkmm/cssprovider.h>
 #include <filesystem>
 
-char command[30] = "";
-
 void thread() {
 	// Revealer
 	if (transition_duration != 0) {
@@ -34,20 +32,23 @@ void thread() {
 	// TODO: Add a dynamic class based on progress
 	// Will be useful for custom css where the screen gets dimmer
 	// based on progress.
-
+	win->label_status.set_label("Closing programs...");
+	win->progressbar_sync.set_fraction(1);
 	kill_child_processes();
 
 	// Sync filesystems
+	win->label_status.set_label("Syncing filesystems...");
 	win->timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*win, &syspower::on_timer_tick), 50);
-	win->progressbar_sync.set_fraction(1);
 	sync_filesystems();
 
 	// Cleanup
 	win->progressbar_sync.set_fraction(0);
+	win->progressbar_sync.set_visible(false);
 	win->timer_connection.disconnect();
 
 	// Run action
-	system(command);
+	win->label_status.set_label(win->button_text);
+	system(win->command);
 }
 
 void syspower::show_other_windows() {
@@ -76,7 +77,7 @@ void syspower::show_other_windows() {
 
 		// Layer shell stuff
 		gtk_layer_init_for_window(window->gobj());
-		gtk_layer_set_namespace(gobj(), "syspower_empty_window");
+		gtk_layer_set_namespace(window->gobj(), "syspower-empty-window");
 		gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
 		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
 		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_RIGHT, true);
@@ -222,7 +223,7 @@ void syspower::on_button_clicked(int button) {
 			// Elogind
 			strcpy(command, "loginctl poweroff");
 
-		label_status.set_label("Shutting down...");
+		button_text = "Shutting down...";
 	}
 	else if (button == 1) {
 		if (access("/bin/systemctl", F_OK) != -1)
@@ -232,11 +233,11 @@ void syspower::on_button_clicked(int button) {
 			// Elogind
 			strcpy(command, "loginctl reboot");
 
-		label_status.set_label("Rebooting...");
+		button_text = "Rebooting...";
 	}
 	else if (button == 2) {
 		strcpy(command, "loginctl terminate-user $USER");
-		label_status.set_label("Logging out...");
+		button_text = "Logging out...";
 	}
 	else if (button == 3) {
 		app->quit();

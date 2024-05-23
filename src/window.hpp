@@ -16,6 +16,8 @@ class syspower : public Gtk::Window {
 		sigc::connection timer_connection;
 
 		double max_slider_value;
+		char command[30] = "";
+		Glib::ustring button_text;
 
 		bool on_timer_tick();
 		void show_other_windows();
