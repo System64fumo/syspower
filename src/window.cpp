@@ -11,37 +11,9 @@
 #include <gtkmm/cssprovider.h>
 #include <filesystem>
 
-std::string action_type;
+char command[30] = "";
 
 void thread() {
-	char command[30] = "";
-
-	// Figure out what we're doing
-	if (action_type == "shutdown") {
-		if (access("/bin/systemctl", F_OK) != -1)
-			// Systemd-logind
-			strcpy(command, "systemctl poweroff");
-		else
-			// Elogind
-			strcpy(command, "loginctl poweroff");
-
-		win->label_status.set_label("Shutting down...");
-	}
-	else if (action_type == "reboot") {
-		if (access("/bin/systemctl", F_OK) != -1)
-			// Systemd-logind
-			strcpy(command, "systemctl reboot");
-		else
-			// Elogind
-			strcpy(command, "loginctl reboot");
-
-		win->label_status.set_label("Rebooting...");
-	}
-	else if (action_type == "logout") {
-		strcpy(command, "loginctl terminate-user $USER");
-		win->label_status.set_label("Logging out...");
-	}
-
 	// Revealer
 	if (transition_duration != 0) {
 		win->revealer_box.set_reveal_child(false);
@@ -223,10 +195,10 @@ syspower::syspower() {
 	button_cancel.set_margin(5);
 
 	// Signals
-	button_shutdown.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_shutdown_clicked));
-	button_reboot.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_reboot_clicked));
-	button_logout.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_logout_clicked));
-	button_cancel.signal_clicked().connect(sigc::mem_fun(*this, &syspower::button_cancel_clicked));
+	button_shutdown.signal_clicked().connect([this]() { on_button_clicked(0); });
+	button_reboot.signal_clicked().connect([this]() { on_button_clicked(1); });
+	button_logout.signal_clicked().connect([this]() { on_button_clicked(2); });
+	button_cancel.signal_clicked().connect([this]() { on_button_clicked(3); });
 
 	// Load custom css
 	std::string home_dir = getenv("HOME");
@@ -240,24 +212,37 @@ syspower::syspower() {
 	style_context->add_provider_for_display(property_display(), css, GTK_STYLE_PROVIDER_PRIORITY_USER);
 }
 
-// TODO: Fix this horrible mess, learn to use dynamic casting or something idk.
-void syspower::button_shutdown_clicked() {
-	action_type = "shutdown";
-	thread_action = std::thread(thread);
-}
+void syspower::on_button_clicked(int button) {
+	// Figure out what we're doing
+	if (button == 0) {
+		if (access("/bin/systemctl", F_OK) != -1)
+			// Systemd-logind
+			strcpy(command, "systemctl poweroff");
+		else
+			// Elogind
+			strcpy(command, "loginctl poweroff");
 
-void syspower::button_reboot_clicked() {
-	action_type = "reboot";
-	thread_action = std::thread(thread);
-}
+		label_status.set_label("Shutting down...");
+	}
+	else if (button == 1) {
+		if (access("/bin/systemctl", F_OK) != -1)
+			// Systemd-logind
+			strcpy(command, "systemctl reboot");
+		else
+			// Elogind
+			strcpy(command, "loginctl reboot");
 
-void syspower::button_logout_clicked() {
-	action_type = "logout";
-	thread_action = std::thread(thread);
-}
+		label_status.set_label("Rebooting...");
+	}
+	else if (button == 2) {
+		strcpy(command, "loginctl terminate-user $USER");
+		label_status.set_label("Logging out...");
+	}
+	else if (button == 3) {
+		app->quit();
+	}
 
-void syspower::button_cancel_clicked() {
-	app->quit();
+	thread_action = std::thread(thread);
 }
 
 bool syspower::on_timer_tick() {

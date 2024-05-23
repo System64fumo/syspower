@@ -31,10 +31,7 @@ class syspower : public Gtk::Window {
 		GdkDisplay *display;
 		GListModel *monitors;
 
-		void button_shutdown_clicked();
-		void button_reboot_clicked();
-		void button_logout_clicked();
-		void button_cancel_clicked();
+		void on_button_clicked(int button);
 };
 
 inline syspower* win;
