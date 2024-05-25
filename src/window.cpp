@@ -59,10 +59,8 @@ void syspower::show_other_windows() {
 
 	int monitorCount = g_list_model_get_n_items(monitors);
 
-	if (main_monitor >= monitorCount) {
-		std::cerr << "Invalid primary monitor value" << std::endl;
-		app->quit();
-	}
+	if (main_monitor >= monitorCount)
+		main_monitor = monitorCount - 1;
 
 	for (int i = 0; i < monitorCount; ++i) {
 		// Ignore primary monitor
