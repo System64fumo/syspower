@@ -1,6 +1,6 @@
 # Syspower
 syspower is a basic power menu and shutdown screen written in gtkmm4<br>
-![preview](https://github.com/system64fumo/syspower/blob/main/preview.gif "preview")
+![preview](https://github.com/System64fumo/syspower/blob/main/preview.gif "preview")
 
 For now this only supports Hyprland.
 
@@ -12,5 +12,6 @@ syspower can be configured in 2 ways<br>
 arguments:
   -p	Set position (0 = top | 1 = right | 2 = bottom | 3 = left | 4 = center)
   -m	Set primary monitor (If you have multiple monitors)
+  -v	Prints version info
   -t	Set revealer transition duration (0 = disabled)
 ```
