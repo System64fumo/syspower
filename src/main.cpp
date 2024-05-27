@@ -1,6 +1,7 @@
 #include "window.hpp"
 #include "main.hpp"
 #include "config.hpp"
+#include "git_info.hpp"
 
 #include <iostream>
 #include <getopt.h>
@@ -9,7 +10,7 @@ int main(int argc, char *argv[]) {
 
 	// Read launch arguments
 	while (true) {
-		switch(getopt(argc, argv, "p:dm:dt:dh")) {
+		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
 			case 'p':
 				position = std::stoi(optarg);
 				if (position > 4 || position < 0) {
@@ -34,6 +35,11 @@ int main(int argc, char *argv[]) {
 				}
 				continue;
 
+			case 'v':
+				std::cout << "Commit: " << GIT_COMMIT_MESSAGE << std::endl;
+				std::cout << "Date: " << GIT_COMMIT_DATE << std::endl;
+				return 0;
+
 			case 'h':
 			default :
 				std::cout << "usage:" << std::endl;
@@ -42,6 +48,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "  -p	Set position" << std::endl;
 				std::cout << "  -m	Set primary monitor" << std::endl;
 				std::cout << "  -t	Set revealer transition duration" << std::endl;
+				std::cout << "  -v	Prints version info" << std::endl;
 				std::cout << "  -h	Show this help message" << std::endl;
 				return 0;
 
