@@ -4,10 +4,9 @@
 #include "git_info.hpp"
 
 #include <iostream>
-#include <getopt.h>
 
 int main(int argc, char *argv[]) {
-
+	#ifdef RUNTIME_CONFIG
 	// Read launch arguments
 	while (true) {
 		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
@@ -58,6 +57,7 @@ int main(int argc, char *argv[]) {
 
 			break;
 	}
+	#endif
 
 	app = Gtk::Application::create("funky.sys64.syspower");
 	win = new syspower();
