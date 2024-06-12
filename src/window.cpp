@@ -2,13 +2,10 @@
 #include "main.hpp"
 #include "config.hpp"
 
-#include <thread>
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <iomanip>
-#include <gtk4-layer-shell.h>
+#include <glibmm/main.h>
 #include <gtkmm/cssprovider.h>
+#include <gtk4-layer-shell.h>
+#include <iostream>
 #include <filesystem>
 
 void thread() {

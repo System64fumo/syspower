@@ -1,8 +1,11 @@
-#ifndef WINDOW_HPP
-#define WINDOW_HPP
+#pragma once
 
-#include <gtkmm.h>
-#include <string>
+#include <gtkmm/window.h>
+#include <gtkmm/label.h>
+#include <gtkmm/progressbar.h>
+#include <gtkmm/revealer.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <thread>
 
 class syspower : public Gtk::Window {
@@ -37,5 +40,3 @@ class syspower : public Gtk::Window {
 };
 
 inline syspower* win;
-
-#endif

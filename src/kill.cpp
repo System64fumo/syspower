@@ -1,7 +1,4 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <cstdlib>
 #include <unistd.h>
 
 std::string executeCommand(const std::string& command) {
