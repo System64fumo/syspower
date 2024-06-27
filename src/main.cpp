@@ -63,11 +63,6 @@ int main(int argc, char *argv[]) {
 	win = new syspower();
 	app->hold();
 
-	// Other monitors
-	app->signal_startup().connect([&]() {
-		win->show_other_windows();
-	});
-
 	app->run();
 
 	return 0;
