@@ -1,24 +1,17 @@
-#include <iostream>
-#include <cstdlib>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mount.h>
+#include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
 
-using namespace std;
-
 int get_dirty_pages() {
-	ifstream meminfo("/proc/meminfo");
-	string line;
+	std::ifstream meminfo("/proc/meminfo");
+	std::string line;
 	int dirtyValue = 0;
 
 	if (meminfo.is_open()) {
 		while (getline(meminfo, line)) {
-			if (line.find("Dirty:") != string::npos) {
-				stringstream ss(line.substr(16));
+			if (line.find("Dirty:") != std::string::npos) {
+				std::stringstream ss(line.substr(16));
 				ss >> dirtyValue;
 				break;
 			}
@@ -27,7 +20,7 @@ int get_dirty_pages() {
 		return dirtyValue;
 	}
 	else {
-		cerr << "Unable to open /proc/meminfo" << endl;
+		std::cerr << "Unable to open /proc/meminfo" << std::endl;
 		return -1;
 	}
 }

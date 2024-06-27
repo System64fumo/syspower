@@ -4,49 +4,48 @@
 #include "css.hpp"
 
 #include <glibmm/main.h>
-#include <gtkmm/cssprovider.h>
 #include <gtk4-layer-shell.h>
 #include <iostream>
-#include <filesystem>
+#include <thread>
 
-void thread() {
+void syspower::thread() {
 	// Revealer
 	if (transition_duration != 0) {
-		win->revealer_box.set_reveal_child(false);
+		revealer_box.set_reveal_child(false);
 		usleep(transition_duration * 1000);
-		win->revealer_box.set_visible(false);
+		revealer_box.set_visible(false);
 	}
 	else
-		win->box_buttons.set_visible(false);
+		box_buttons.set_visible(false);
 
 	// Set proper layout
-	win->box_layout.set_valign(Gtk::Align::CENTER);
-	win->box_layout.set_halign(Gtk::Align::CENTER);
+	box_layout.set_valign(Gtk::Align::CENTER);
+	box_layout.set_halign(Gtk::Align::CENTER);
 
-	win->label_status.set_visible(true);
-	win->progressbar_sync.set_visible(true);
-	win->max_slider_value = get_dirty_pages();
+	label_status.set_visible(true);
+	progressbar_sync.set_visible(true);
+	max_slider_value = get_dirty_pages();
 
 	// TODO: Add a dynamic class based on progress
 	// Will be useful for custom css where the screen gets dimmer
 	// based on progress.
-	win->label_status.set_label("Closing programs...");
-	win->progressbar_sync.set_fraction(1);
+	label_status.set_label("Closing programs...");
+	progressbar_sync.set_fraction(1);
 	kill_child_processes();
 
 	// Sync filesystems
-	win->label_status.set_label("Syncing filesystems...");
-	win->timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*win, &syspower::on_timer_tick), 50);
+	label_status.set_label("Syncing filesystems...");
+	timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &syspower::on_timer_tick), 50);
 	sync_filesystems();
 
 	// Cleanup
-	win->progressbar_sync.set_fraction(0);
-	win->progressbar_sync.set_visible(false);
-	win->timer_connection.disconnect();
+	progressbar_sync.set_fraction(0);
+	progressbar_sync.set_visible(false);
+	timer_connection.disconnect();
 
 	// Run action
-	win->label_status.set_label(win->button_text);
-	system(win->command);
+	label_status.set_label(button_text);
+	system(command);
 }
 
 void syspower::show_other_windows() {
@@ -201,6 +200,11 @@ syspower::syspower() {
 	std::string home_dir = getenv("HOME");
 	std::string css_path = home_dir + "/.config/sys64/power.css";
 	css_loader loader(css_path, this);
+
+	// Other monitors
+	app->signal_startup().connect([&]() {
+		show_other_windows();
+	});
 }
 
 void syspower::on_button_clicked(int button) {
@@ -233,7 +237,8 @@ void syspower::on_button_clicked(int button) {
 		app->quit();
 	}
 
-	thread_action = std::thread(thread);
+	std::thread thread_action(&syspower::thread, this);
+	thread_action.detach();
 }
 
 bool syspower::on_timer_tick() {

@@ -6,10 +6,11 @@
 #include <gtkmm/revealer.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <thread>
 
 class syspower : public Gtk::Window {
 	public:
+		syspower();
+
 		Gtk::Label label_status;
 		Gtk::ProgressBar progressbar_sync;
 		Gtk::Box box_layout;
@@ -22,21 +23,19 @@ class syspower : public Gtk::Window {
 		char command[30] = "";
 		Glib::ustring button_text;
 
-		bool on_timer_tick();
-		void show_other_windows();
-		syspower();
-	
 	private:
 		Gtk::Button button_shutdown;
 		Gtk::Button button_reboot;
 		Gtk::Button button_logout;
 		Gtk::Button button_cancel;
 
-		std::thread thread_action;
 		GdkDisplay *display;
 		GListModel *monitors;
 
+		void thread();
+		void show_other_windows();
 		void on_button_clicked(int button);
+		bool on_timer_tick();
 };
 
 inline syspower* win;
