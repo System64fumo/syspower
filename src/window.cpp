@@ -198,7 +198,7 @@ syspower::syspower() {
 
 	// Load custom css
 	std::string home_dir = getenv("HOME");
-	std::string css_path = home_dir + "/.config/sys64/power.css";
+	std::string css_path = home_dir + "/.config/sys64/power/style.css";
 	css_loader loader(css_path, this);
 
 	// Other monitors
