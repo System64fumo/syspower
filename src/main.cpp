@@ -1,9 +1,26 @@
-#include "window.hpp"
 #include "main.hpp"
 #include "config.hpp"
 #include "git_info.hpp"
 
 #include <iostream>
+#include <dlfcn.h>
+
+void load_libsyspower() {
+	void* handle = dlopen("libsyspower.so", RTLD_LAZY);
+	if (!handle) {
+		std::cerr << "Cannot open library: " << dlerror() << '\n';
+		exit(1);
+	}
+
+	syspower_create_ptr = (syspower_create_func)dlsym(handle, "syspower_create");
+	syspower_show_windows_ptr = (syspower_show_windows_func)dlsym(handle, "syspower_show_windows");
+
+	if (!syspower_create_ptr || !syspower_show_windows_ptr) {
+		std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+		dlclose(handle);
+		exit(1);
+	}
+}
 
 int main(int argc, char *argv[]) {
 	#ifdef RUNTIME_CONFIG
@@ -60,10 +77,15 @@ int main(int argc, char *argv[]) {
 	#endif
 
 	app = Gtk::Application::create("funky.sys64.syspower");
-	win = new syspower();
-	app->hold();
 
-	app->run();
+	load_libsyspower();
+	syspower *window = syspower_create_ptr();
 
-	return 0;
+	// Add windows
+	app->signal_startup().connect([&]() {
+		app->add_window(*window);
+		syspower_show_windows_ptr(window);
+	});
+
+	return app->run();
 }
