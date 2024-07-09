@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "git_info.hpp"
 
+#include <gtkmm/application.h>
 #include <iostream>
 #include <dlfcn.h>
 
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]) {
 	}
 	#endif
 
-	app = Gtk::Application::create("funky.sys64.syspower");
+	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("funky.sys64.syspower");
 
 	load_libsyspower();
 	syspower *window = syspower_create_ptr();
