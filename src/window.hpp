@@ -1,4 +1,6 @@
 #pragma once
+#include "config.hpp"
+
 #include <gtkmm/window.h>
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
@@ -8,10 +10,11 @@
 
 class syspower : public Gtk::Window {
 	public:
-		syspower();
+		syspower(const config &cfg);
 		void show_other_windows();
 
 	private:
+		config config_main;
 		double max_slider_value;
 		char command[30] = "";
 		Glib::ustring button_text;
@@ -38,7 +41,7 @@ class syspower : public Gtk::Window {
 };
 
 extern "C" {
-	syspower *syspower_create();
+	syspower *syspower_create(const config &cfg);
 	void syspower_show_windows(syspower* window);
 }
 
