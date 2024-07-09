@@ -1,88 +1,11 @@
 #include "window.hpp"
-#include "main.hpp"
+#include "functions.hpp"
 #include "config.hpp"
 #include "css.hpp"
 
 #include <glibmm/main.h>
 #include <gtk4-layer-shell.h>
-#include <iostream>
 #include <thread>
-
-void syspower::thread() {
-	// Revealer
-	if (transition_duration != 0) {
-		revealer_box.set_reveal_child(false);
-		usleep(transition_duration * 1000);
-		revealer_box.set_visible(false);
-	}
-	else
-		box_buttons.set_visible(false);
-
-	// Set proper layout
-	box_layout.set_valign(Gtk::Align::CENTER);
-	box_layout.set_halign(Gtk::Align::CENTER);
-
-	label_status.set_visible(true);
-	progressbar_sync.set_visible(true);
-	max_slider_value = get_dirty_pages();
-
-	// TODO: Add a dynamic class based on progress
-	// Will be useful for custom css where the screen gets dimmer
-	// based on progress.
-	label_status.set_label("Closing programs...");
-	progressbar_sync.set_fraction(1);
-	kill_child_processes();
-
-	// Sync filesystems
-	label_status.set_label("Syncing filesystems...");
-	timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &syspower::on_timer_tick), 50);
-	sync_filesystems();
-
-	// Cleanup
-	progressbar_sync.set_fraction(0);
-	progressbar_sync.set_visible(false);
-	timer_connection.disconnect();
-
-	// Run action
-	label_status.set_label(button_text);
-	system(command);
-}
-
-void syspower::show_other_windows() {
-	// Get all monitors
-	display = gdk_display_get_default();
-	monitors = gdk_display_get_monitors(display);
-	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, main_monitor)));
-
-	int monitorCount = g_list_model_get_n_items(monitors);
-
-	if (main_monitor >= monitorCount)
-		main_monitor = monitorCount - 1;
-
-	for (int i = 0; i < monitorCount; ++i) {
-		// Ignore primary monitor
-		if (i == main_monitor)
-			continue;
-
-		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
-
-		// Create empty windows
-		auto window = std::make_shared<Gtk::Window>();
-
-		// Layer shell stuff
-		gtk_layer_init_for_window(window->gobj());
-		gtk_layer_set_namespace(window->gobj(), "syspower-empty-window");
-		gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
-		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
-		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_RIGHT, true);
-		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_TOP, true);
-		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
-		gtk_layer_set_monitor(window->gobj(), monitor);
-
-		windows.push_back(window);
-		window->show();
-	}
-}
 
 syspower::syspower() {
 	// Layer shell stuff
@@ -190,10 +113,10 @@ syspower::syspower() {
 	button_cancel.set_margin(5);
 
 	// Signals
-	button_shutdown.signal_clicked().connect([this]() { on_button_clicked(0); });
-	button_reboot.signal_clicked().connect([this]() { on_button_clicked(1); });
-	button_logout.signal_clicked().connect([this]() { on_button_clicked(2); });
-	button_cancel.signal_clicked().connect([this]() { on_button_clicked(3); });
+	button_shutdown.signal_clicked().connect([this]() { on_button_clicked('s'); });
+	button_reboot.signal_clicked().connect([this]() { on_button_clicked('r'); });
+	button_logout.signal_clicked().connect([this]() { on_button_clicked('l'); });
+	button_cancel.signal_clicked().connect([this]() { on_button_clicked('c'); });
 
 	// Load custom css
 	std::string home_dir = getenv("HOME");
@@ -201,9 +124,85 @@ syspower::syspower() {
 	css_loader loader(css_path, this);
 }
 
-void syspower::on_button_clicked(int button) {
+void syspower::show_other_windows() {
+	// Get all monitors
+	display = gdk_display_get_default();
+	monitors = gdk_display_get_monitors(display);
+	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, main_monitor)));
+
+	int monitorCount = g_list_model_get_n_items(monitors);
+
+	if (main_monitor >= monitorCount)
+		main_monitor = monitorCount - 1;
+
+	for (int i = 0; i < monitorCount; ++i) {
+		// Ignore primary monitor
+		if (i == main_monitor)
+			continue;
+
+		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
+
+		// Create empty windows
+		auto window = std::make_shared<Gtk::Window>();
+
+		// Layer shell stuff
+		gtk_layer_init_for_window(window->gobj());
+		gtk_layer_set_namespace(window->gobj(), "syspower-empty-window");
+		gtk_layer_set_layer(window->gobj(), GTK_LAYER_SHELL_LAYER_TOP);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_RIGHT, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_TOP, true);
+		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
+		gtk_layer_set_monitor(window->gobj(), monitor);
+
+		windows.push_back(window);
+		window->show();
+	}
+}
+
+void syspower::action_thread() {
+	// Revealer
+	if (transition_duration != 0) {
+		revealer_box.set_reveal_child(false);
+		usleep(transition_duration * 1000);
+		revealer_box.set_visible(false);
+	}
+	else
+		box_buttons.set_visible(false);
+
+	// Set proper layout
+	box_layout.set_valign(Gtk::Align::CENTER);
+	box_layout.set_halign(Gtk::Align::CENTER);
+
+	label_status.set_visible(true);
+	progressbar_sync.set_visible(true);
+	max_slider_value = syspower_functions::get_dirty_pages();
+
+	// TODO: Add a dynamic class based on progress
+	// Will be useful for custom css where the screen gets dimmer
+	// based on progress.
+	label_status.set_label("Closing programs...");
+	progressbar_sync.set_fraction(1);
+	syspower_functions::kill_child_processes();
+
+	// Sync filesystems
+	label_status.set_label("Syncing filesystems...");
+	timer_connection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &syspower::on_timer_tick), 50);
+	syspower_functions::sync_filesystems();
+
+	// Cleanup
+	progressbar_sync.set_fraction(0);
+	progressbar_sync.set_visible(false);
+	timer_connection.disconnect();
+
+	// Run action
+	label_status.set_label(button_text);
+	system(command);
+}
+
+void syspower::on_button_clicked(const char &button) {
 	// Figure out what we're doing
-	if (button == 0) {
+	if (button == 's') {
 		if (access("/bin/systemctl", F_OK) != -1)
 			// Systemd-logind
 			strcpy(command, "systemctl poweroff");
@@ -213,7 +212,7 @@ void syspower::on_button_clicked(int button) {
 
 		button_text = "Shutting down...";
 	}
-	else if (button == 1) {
+	else if (button == 'r') {
 		if (access("/bin/systemctl", F_OK) != -1)
 			// Systemd-logind
 			strcpy(command, "systemctl reboot");
@@ -223,12 +222,11 @@ void syspower::on_button_clicked(int button) {
 
 		button_text = "Rebooting...";
 	}
-	else if (button == 2) {
+	else if (button == 'l') {
 		strcpy(command, "loginctl terminate-user $USER");
 		button_text = "Logging out...";
 	}
-	else if (button == 3) {
-		//app->quit();
+	else if (button == 'c') {
 		for (const auto &window : windows) {
 			delete &window;
 		}
@@ -236,12 +234,12 @@ void syspower::on_button_clicked(int button) {
 		return;
 	}
 
-	std::thread thread_action(&syspower::thread, this);
+	std::thread thread_action(&syspower::action_thread, this);
 	thread_action.detach();
 }
 
 bool syspower::on_timer_tick() {
-	double dirty_pages_kb = get_dirty_pages();
+	double dirty_pages_kb = syspower_functions::get_dirty_pages();
 	double value = dirty_pages_kb / max_slider_value;
 
 	if (progressbar_sync.get_fraction() > value)

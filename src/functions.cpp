@@ -1,19 +1,37 @@
-#include <iostream>
-#include <unistd.h>
+#include "functions.hpp"
 
-std::string executeCommand(const std::string& command) {
-	std::string result;
-	char buffer[128];
-	FILE* pipe = popen(command.c_str(), "r");
-	while (!feof(pipe)) {
-		if (fgets(buffer, 128, pipe) != nullptr)
-			result += buffer;
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+int syspower_functions::get_dirty_pages() {
+	std::ifstream meminfo("/proc/meminfo");
+	std::string line;
+	int dirtyValue = 0;
+
+	if (meminfo.is_open()) {
+		while (getline(meminfo, line)) {
+			if (line.find("Dirty:") != std::string::npos) {
+				std::stringstream ss(line.substr(16));
+				ss >> dirtyValue;
+				break;
+			}
+		}
+		meminfo.close();
+		return dirtyValue;
 	}
-	pclose(pipe);
-	return result;
+	else {
+		std::cerr << "Unable to open /proc/meminfo" << std::endl;
+		return -1;
+	}
 }
 
-void kill_child_processes() {
+void syspower_functions::sync_filesystems() {
+	sync();
+}
+
+void syspower_functions::kill_child_processes() {
 	// TODO: Consider adding support for other comps. (Probably won't happen)
 
 	std::string command = "hyprctl clients -j";
@@ -51,4 +69,16 @@ void kill_child_processes() {
 		}
 		pos = output.find(searchString, pos + 1);
 	}
+}
+
+std::string syspower_functions::executeCommand(const std::string& command) {
+	std::string result;
+	char buffer[128];
+	FILE* pipe = popen(command.c_str(), "r");
+	while (!feof(pipe)) {
+		if (fgets(buffer, 128, pipe) != nullptr)
+			result += buffer;
+	}
+	pclose(pipe);
+	return result;
 }
