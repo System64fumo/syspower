@@ -24,29 +24,31 @@ void load_libsyspower() {
 }
 
 int main(int argc, char *argv[]) {
+	config config_main;
+
 	#ifdef RUNTIME_CONFIG
 	// Read launch arguments
 	while (true) {
 		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
 			case 'p':
-				position = std::stoi(optarg);
-				if (position > 4 || position < 0) {
+				config_main.position = std::stoi(optarg);
+				if (config_main.position > 4 || config_main.position < 0) {
 					std::cerr << "Invalid position value" << std::endl;
 					return 1;
 				}
 				continue;
 
 			case 'm':
-				main_monitor = std::stoi(optarg);
-				if (main_monitor < 0) {
+				config_main.main_monitor = std::stoi(optarg);
+				if (config_main.main_monitor < 0) {
 					std::cerr << "Invalid primary monitor value" << std::endl;
 					return 1;
 				}
 				continue;
 
 			case 't':
-				transition_duration = std::stoi(optarg);
-				if (transition_duration < 0 || position < 0) {
+				config_main.transition_duration = std::stoi(optarg);
+				if (config_main.transition_duration < 0 || config_main.position < 0) {
 					std::cerr << "Invalid transition duration value" << std::endl;
 					return 1;
 				}
@@ -80,7 +82,7 @@ int main(int argc, char *argv[]) {
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("funky.sys64.syspower");
 
 	load_libsyspower();
-	syspower *window = syspower_create_ptr();
+	syspower *window = syspower_create_ptr(config_main);
 
 	// Add windows
 	app->signal_startup().connect([&]() {

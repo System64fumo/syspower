@@ -1,13 +1,17 @@
+#pragma once
+
+// Build time configuration		Description
+#define RUNTIME_CONFIG
+
 /*
 	Default config.
 	Can be configured instead of using launch arguments.
 	Runtime configuration can be disabled by deleting #define RUNTIME_CONFIG
 */
 
-#define RUNTIME_CONFIG
-
-// Current								Default
-inline int position = 4;				// 4
-inline int main_monitor = 0;			// 0
-inline int transition_duration = 1000;	// 1000
+struct config {
+	int position = 4;
+	int main_monitor = 0;
+	int transition_duration = 1000;
+};
 

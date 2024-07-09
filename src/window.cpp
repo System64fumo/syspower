@@ -7,7 +7,9 @@
 #include <gtk4-layer-shell.h>
 #include <thread>
 
-syspower::syspower() {
+syspower::syspower(const config &cfg) {
+	config_main = cfg;
+
 	// Layer shell stuff
 	gtk_layer_init_for_window(gobj());
 	gtk_layer_set_keyboard_mode(gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND);
@@ -31,7 +33,7 @@ syspower::syspower() {
 
 	Gtk::RevealerTransitionType transition_type = Gtk::RevealerTransitionType::SLIDE_UP;
 
-	switch (position) {
+	switch (config_main.position) {
 		case 0: // Top
 			box_layout.set_valign(Gtk::Align::START);
 			box_layout.set_halign(Gtk::Align::CENTER);
@@ -68,13 +70,13 @@ syspower::syspower() {
 	box_layout.append(label_status);
 
 	// Revealer
-	if (transition_duration != 0) {
+	if (config_main.transition_duration != 0) {
 		box_layout.append(revealer_box);
 		revealer_box.set_child(box_buttons);
 		revealer_box.set_transition_type(transition_type);
 		revealer_box.set_transition_duration(0);
 		revealer_box.set_reveal_child(true);
-		revealer_box.set_transition_duration(transition_duration);
+		revealer_box.set_transition_duration(config_main.transition_duration);
 	}
 	else
 		box_layout.append(box_buttons);
@@ -128,16 +130,16 @@ void syspower::show_other_windows() {
 	// Get all monitors
 	display = gdk_display_get_default();
 	monitors = gdk_display_get_monitors(display);
-	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, main_monitor)));
+	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, config_main.main_monitor)));
 
 	int monitorCount = g_list_model_get_n_items(monitors);
 
-	if (main_monitor >= monitorCount)
-		main_monitor = monitorCount - 1;
+	if (config_main.main_monitor >= monitorCount)
+		config_main.main_monitor = monitorCount - 1;
 
 	for (int i = 0; i < monitorCount; ++i) {
 		// Ignore primary monitor
-		if (i == main_monitor)
+		if (i == config_main.main_monitor)
 			continue;
 
 		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
@@ -162,9 +164,9 @@ void syspower::show_other_windows() {
 
 void syspower::action_thread() {
 	// Revealer
-	if (transition_duration != 0) {
+	if (config_main.transition_duration != 0) {
 		revealer_box.set_reveal_child(false);
-		usleep(transition_duration * 1000);
+		usleep(config_main.transition_duration * 1000);
 		revealer_box.set_visible(false);
 	}
 	else
@@ -249,8 +251,8 @@ bool syspower::on_timer_tick() {
 }
 
 extern "C" {
-	syspower *syspower_create() {
-		return new syspower();
+	syspower *syspower_create(const config &cfg) {
+		return new syspower(cfg);
 	}
 
 	void syspower_show_windows(syspower *window) {
