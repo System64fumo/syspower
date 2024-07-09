@@ -67,8 +67,7 @@ void syspower::show_other_windows() {
 		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
 
 		// Create empty windows
-		Gtk::Window *window = new Gtk::Window();
-		app->add_window(*window);
+		auto window = std::make_shared<Gtk::Window>();
 
 		// Layer shell stuff
 		gtk_layer_init_for_window(window->gobj());
@@ -80,6 +79,7 @@ void syspower::show_other_windows() {
 		gtk_layer_set_anchor(window->gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
 		gtk_layer_set_monitor(window->gobj(), monitor);
 
+		windows.push_back(window);
 		window->show();
 	}
 }
@@ -103,7 +103,6 @@ syspower::syspower() {
 	set_default_size(200, 100);
 	set_child(box_layout);
 	show();
-
 	box_layout.get_style_context()->add_class("box_layout");
 	box_layout.property_orientation().set_value(Gtk::Orientation::VERTICAL);
 
@@ -200,11 +199,6 @@ syspower::syspower() {
 	std::string home_dir = getenv("HOME");
 	std::string css_path = home_dir + "/.config/sys64/power/style.css";
 	css_loader loader(css_path, this);
-
-	// Other monitors
-	app->signal_startup().connect([&]() {
-		show_other_windows();
-	});
 }
 
 void syspower::on_button_clicked(int button) {
@@ -234,7 +228,12 @@ void syspower::on_button_clicked(int button) {
 		button_text = "Logging out...";
 	}
 	else if (button == 3) {
-		app->quit();
+		//app->quit();
+		for (const auto &window : windows) {
+			delete &window;
+		}
+		close();
+		return;
 	}
 
 	std::thread thread_action(&syspower::thread, this);
@@ -249,4 +248,14 @@ bool syspower::on_timer_tick() {
 		progressbar_sync.set_fraction(value);
 
 	return true;
+}
+
+extern "C" {
+	syspower *syspower_create() {
+		return new syspower();
+	}
+
+	void syspower_show_windows(syspower *window) {
+		window->show_other_windows();
+	}
 }

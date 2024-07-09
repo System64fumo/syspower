@@ -23,6 +23,8 @@ class syspower : public Gtk::Window {
 		char command[30] = "";
 		Glib::ustring button_text;
 
+		void show_other_windows();
+
 	private:
 		Gtk::Button button_shutdown;
 		Gtk::Button button_reboot;
@@ -31,11 +33,15 @@ class syspower : public Gtk::Window {
 
 		GdkDisplay *display;
 		GListModel *monitors;
+		std::vector<std::shared_ptr<Gtk::Window>> windows;
 
 		void thread();
-		void show_other_windows();
 		void on_button_clicked(int button);
 		bool on_timer_tick();
 };
 
-inline syspower* win;
+extern "C" {
+	syspower *syspower_create();
+	void syspower_show_windows(syspower* window);
+}
+
