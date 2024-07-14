@@ -1,15 +1,10 @@
 #pragma once
 
 // Build time configuration		Description
-#define RUNTIME_CONFIG
+#define RUNTIME_CONFIG			// Allow the use of runtime arguments
 
-/*
-	Default config.
-	Can be configured instead of using launch arguments.
-	Runtime configuration can be disabled by deleting #define RUNTIME_CONFIG
-*/
-
-struct config {
+// Default config
+struct config_power {
 	int position = 4;
 	int main_monitor = 0;
 	int transition_duration = 1000;

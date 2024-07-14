@@ -7,7 +7,7 @@
 #include <gtk4-layer-shell.h>
 #include <thread>
 
-syspower::syspower(const config &cfg) {
+syspower::syspower(const config_power &cfg) {
 	config_main = cfg;
 
 	// Layer shell stuff
@@ -251,7 +251,7 @@ bool syspower::on_timer_tick() {
 }
 
 extern "C" {
-	syspower *syspower_create(const config &cfg) {
+	syspower *syspower_create(const config_power &cfg) {
 		return new syspower(cfg);
 	}
 

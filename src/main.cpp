@@ -24,10 +24,9 @@ void load_libsyspower() {
 }
 
 int main(int argc, char *argv[]) {
-	config config_main;
 
-	#ifdef RUNTIME_CONFIG
 	// Read launch arguments
+	#ifdef RUNTIME_CONFIG
 	while (true) {
 		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
 			case 'p':

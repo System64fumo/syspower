@@ -10,11 +10,11 @@
 
 class syspower : public Gtk::Window {
 	public:
-		syspower(const config &cfg);
+		syspower(const config_power &cfg);
 		void show_other_windows();
 
 	private:
-		config config_main;
+		config_power config_main;
 		double max_slider_value;
 		char command[30] = "";
 		Glib::ustring button_text;
@@ -41,7 +41,7 @@ class syspower : public Gtk::Window {
 };
 
 extern "C" {
-	syspower *syspower_create(const config &cfg);
+	syspower *syspower_create(const config_power &cfg);
 	void syspower_show_windows(syspower* window);
 }
 
