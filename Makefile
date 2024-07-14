@@ -19,7 +19,7 @@ install: $(all)
 clean:
 	rm $(EXEC) $(LIB) $(SRCS:.cpp=.o) src/git_info.hpp
 
-$(EXEC): src/git_info.hpp
+$(EXEC): src/main.cpp src/git_info.hpp
 	$(CXX) -o $(EXEC) \
 	src/main.cpp \
 	$(CXXFLAGS) \
