@@ -23,6 +23,7 @@ syspower::syspower(const config_power &cfg) {
 	gtk_layer_set_anchor(gobj(), GTK_LAYER_SHELL_EDGE_BOTTOM, true);
 
 	// Initialization
+	set_name("syspower");
 	set_title("Power Menu");
 	add_css_class("primary_window");
 	set_default_size(200, 100);

@@ -1,27 +1,27 @@
-window {
+#syspower {
 	background: rgba(0, 0, 0, 0.75);
 }
 
-.primary_window {
+#syspower .primary_window {
 }
 
-.box_layout {
+#syspower .box_layout {
 }
 
-.label_status {
+#syspower .label_status {
 }
 
-.box_buttons {
+#syspower .box_buttons {
 }
 
-.progressbar_status {
+#syspower .progressbar_status {
 }
 
-.button_shutdown {
+#syspower .button_shutdown {
 }
-.button_reboot {
+#syspower .button_reboot {
 }
-.button_logout {
+#syspower .button_logout {
 }
-.button_cancel {
+#syspower .button_cancel {
 }
