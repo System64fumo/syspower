@@ -1,7 +1,7 @@
 EXEC = syspower
 LIB = libsyspower.so
 PKGS = gtkmm-4.0 gtk4-layer-shell-0	
-SRCS = $(filter-out src/main.cpp, $(wildcard src/*.cpp))
+SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DESTDIR = $(HOME)/.local
 
@@ -17,17 +17,18 @@ install: $(all)
 	install $(LIB) $(DESTDIR)/lib/$(LIB)
 
 clean:
-	rm $(EXEC) $(LIB) $(SRCS:.cpp=.o) src/git_info.hpp
+	rm $(EXEC) $(LIB) $(OBJS) src/git_info.hpp
 
-$(EXEC): src/main.cpp src/git_info.hpp
+$(EXEC): src/main.o src/config_parser.o src/git_info.hpp
 	$(CXX) -o $(EXEC) \
-	src/main.cpp \
+	src/main.o \
+	src/config_parser.o \
 	$(CXXFLAGS) \
 	$(LDFLAGS)
 
 $(LIB): $(OBJS)
 	$(CXX) -o $(LIB) \
-	$(OBJS) \
+	$(filter-out src/main.o src/config_parser.o, $(OBJS)) \
 	$(CXXFLAGS) \
 	-shared
 

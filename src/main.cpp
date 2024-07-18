@@ -1,5 +1,6 @@
 #include "main.hpp"
 #include "config.hpp"
+#include "config_parser.hpp"
 #include "git_info.hpp"
 
 #include <gtkmm/application.h>
@@ -24,9 +25,25 @@ void load_libsyspower() {
 }
 
 int main(int argc, char *argv[]) {
+	// Load the config
+	#ifdef CONFIG_FILE
+	config_parser config(std::string(getenv("HOME")) + "/.config/sys64/power/config.conf");
+
+	std::string cfg_position = config.get_value("main", "position");
+	if (cfg_position != "empty")
+		config_main.position = std::stoi(cfg_position);
+
+	std::string cfg_monitor =  config.get_value("main", "monitor");
+	if (cfg_monitor != "empty")
+		config_main.main_monitor=std::stoi(cfg_monitor);
+
+	std::string cfg_transition =  config.get_value("main", "transition-duration");
+	if (cfg_transition != "empty")
+		config_main.transition_duration =std::stoi(cfg_transition);
+	#endif
 
 	// Read launch arguments
-	#ifdef RUNTIME_CONFIG
+	#ifdef CONFIG_RUNTIME
 	while (true) {
 		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
 			case 'p':
