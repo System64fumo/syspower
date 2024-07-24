@@ -19,7 +19,7 @@ install: $(all)
 clean:
 	rm $(EXEC) $(LIB) $(OBJS) src/git_info.hpp
 
-$(EXEC): src/main.o src/config_parser.o src/git_info.hpp
+$(EXEC): src/git_info.hpp src/main.o src/config_parser.o
 	$(CXX) -o $(EXEC) \
 	src/main.o \
 	src/config_parser.o \
