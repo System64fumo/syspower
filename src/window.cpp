@@ -14,7 +14,7 @@ syspower::syspower(const config_power &cfg) {
 	gtk_layer_init_for_window(gobj());
 	gtk_layer_set_keyboard_mode(gobj(), GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND);
 	gtk_layer_set_namespace(gobj(), "syspower");
-	gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_TOP);
+	gtk_layer_set_layer(gobj(), GTK_LAYER_SHELL_LAYER_OVERLAY);
 
 	// TODO: Add customization, For now assume fullscreen.
 	gtk_layer_set_anchor(gobj(), GTK_LAYER_SHELL_EDGE_LEFT, true);
