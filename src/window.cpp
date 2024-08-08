@@ -28,7 +28,8 @@ syspower::syspower(const config_power &cfg) {
 	add_css_class("primary_window");
 	set_default_size(200, 100);
 	set_child(box_layout);
-	show();
+	show_other_windows();
+
 	box_layout.get_style_context()->add_class("box_layout");
 	box_layout.property_orientation().set_value(Gtk::Orientation::VERTICAL);
 
@@ -131,7 +132,8 @@ void syspower::show_other_windows() {
 	// Get all monitors
 	display = gdk_display_get_default();
 	monitors = gdk_display_get_monitors(display);
-	gtk_layer_set_monitor (gobj(), GDK_MONITOR(g_list_model_get_item(monitors, config_main.main_monitor)));
+	gtk_layer_set_monitor(gobj(), GDK_MONITOR(g_list_model_get_item(monitors, config_main.main_monitor)));
+	show();
 
 	int monitorCount = g_list_model_get_n_items(monitors);
 
