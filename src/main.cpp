@@ -102,10 +102,9 @@ int main(int argc, char *argv[]) {
 	load_libsyspower();
 	syspower *window = syspower_create_ptr(config_main);
 
-	// Add windows
+	// Add window
 	app->signal_startup().connect([&]() {
 		app->add_window(*window);
-		syspower_show_windows_ptr(window);
 	});
 
 	return app->run();
