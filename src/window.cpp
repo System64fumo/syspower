@@ -149,6 +149,8 @@ void syspower::show_other_windows() {
 
 		// Create empty windows
 		auto window = std::make_shared<Gtk::Window>();
+		window->set_name("syspower");
+		window->add_css_class("empty_window");
 
 		// Layer shell stuff
 		gtk_layer_init_for_window(window->gobj());
@@ -256,9 +258,5 @@ bool syspower::on_timer_tick() {
 extern "C" {
 	syspower *syspower_create(const config_power &cfg) {
 		return new syspower(cfg);
-	}
-
-	void syspower_show_windows(syspower *window) {
-		window->show_other_windows();
 	}
 }
