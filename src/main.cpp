@@ -15,9 +15,8 @@ void load_libsyspower() {
 	}
 
 	syspower_create_ptr = (syspower_create_func)dlsym(handle, "syspower_create");
-	syspower_show_windows_ptr = (syspower_show_windows_func)dlsym(handle, "syspower_show_windows");
 
-	if (!syspower_create_ptr || !syspower_show_windows_ptr) {
+	if (!syspower_create_ptr) {
 		std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 		dlclose(handle);
 		exit(1);
