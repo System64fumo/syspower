@@ -42,6 +42,5 @@ class syspower : public Gtk::Window {
 
 extern "C" {
 	syspower *syspower_create(const config_power &cfg);
-	void syspower_show_windows(syspower* window);
 }
 
