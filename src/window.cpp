@@ -204,7 +204,8 @@ void syspower::action_thread() {
 
 	// Run action
 	label_status.set_label(button_text);
-	system(command);
+	int ret = system(command);
+	(void)ret; // Unused variable
 }
 
 void syspower::on_button_clicked(const char &button) {
