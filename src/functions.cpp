@@ -64,7 +64,8 @@ void syspower_functions::kill_child_processes() {
 				// Also change the system status to "Closing xyz..."
 				// And add a button to minimize the shutdown screen to take action
 				// And a button to forcefully kill the program (Skip others too)
-				system(kill_command.c_str());
+				int ret = system(kill_command.c_str());
+				(void)ret; // Unused variable
 			}
 		}
 		pos = output.find(searchString, pos + 1);
