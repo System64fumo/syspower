@@ -4,6 +4,7 @@
 #include "css.hpp"
 
 #include <glibmm/main.h>
+#include <filesystem>
 #include <gtk4-layer-shell.h>
 #include <thread>
 
@@ -123,9 +124,15 @@ syspower::syspower(const config_power &cfg) {
 	button_cancel.signal_clicked().connect([this]() { on_button_clicked('c'); });
 
 	// Load custom css
-	std::string home_dir = getenv("HOME");
-	std::string css_path = home_dir + "/.config/sys64/power/style.css";
-	css_loader loader(css_path, this);
+	std::string style_path;
+	if (std::filesystem::exists(std::string(getenv("HOME")) + "/.config/sys64/power/style.css"))
+		style_path = std::string(getenv("HOME")) + "/.config/sys64/power/style.css";
+	else if (std::filesystem::exists("/usr/share/sys64/power/style.css"))
+		style_path = "/usr/share/sys64/power/style.css";
+	else
+		style_path = "/usr/local/share/sys64/power/style.css";
+
+	css_loader loader(style_path, this);
 }
 
 void syspower::show_other_windows() {
