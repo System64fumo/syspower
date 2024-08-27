@@ -93,35 +93,10 @@ syspower::syspower(const config_power &cfg) {
 	progressbar_sync.set_visible(false);
 
 	// Button shenanigans
-	box_buttons.append(button_shutdown);
-	button_shutdown.get_style_context()->add_class("button_shutdown");
-	button_shutdown.set_size_request(300, 75);
-	button_shutdown.set_label("Shutdown");
-	button_shutdown.set_margin(5);
-
-	box_buttons.append(button_reboot);
-	button_reboot.get_style_context()->add_class("button_reboot");
-	button_reboot.set_size_request(300, 75);
-	button_reboot.set_label("Reboot");
-	button_reboot.set_margin(5);
-
-	box_buttons.append(button_logout);
-	button_logout.get_style_context()->add_class("button_logout");
-	button_logout.set_size_request(300, 75);
-	button_logout.set_label("Logout");
-	button_logout.set_margin(5);
-
-	box_buttons.append(button_cancel);
-	button_cancel.get_style_context()->add_class("button_cancel");
-	button_cancel.set_size_request(300, 75);
-	button_cancel.set_label("Cancel");
-	button_cancel.set_margin(5);
-
-	// Signals
-	button_shutdown.signal_clicked().connect([this]() { on_button_clicked('s'); });
-	button_reboot.signal_clicked().connect([this]() { on_button_clicked('r'); });
-	button_logout.signal_clicked().connect([this]() { on_button_clicked('l'); });
-	button_cancel.signal_clicked().connect([this]() { on_button_clicked('c'); });
+	add_button("Shutdown");
+	add_button("Reboot");
+	add_button("Logout");
+	add_button("Cancel");
 
 	// Load custom css
 	std::string style_path;
@@ -213,6 +188,20 @@ void syspower::action_thread() {
 	label_status.set_label(button_text);
 	int ret = system(command);
 	(void)ret; // Unused variable
+}
+
+void syspower::add_button(const std::string &label) {
+	Gtk::Button *button = Gtk::make_managed<Gtk::Button>(label);
+	std::string lowecase = label;
+	for (char& c : lowecase)
+		c = std::tolower(static_cast<unsigned char>(c));
+	button->set_size_request(300, 75);
+	button->set_margin(5);
+	button->get_style_context()->add_class("button_" + lowecase);
+	box_buttons.append(*button);
+	button->signal_clicked().connect([this, lowecase]() {
+		on_button_clicked(lowecase.c_str()[0]);
+	});
 }
 
 void syspower::on_button_clicked(const char &button) {
