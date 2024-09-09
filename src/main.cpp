@@ -5,20 +5,19 @@
 
 #include <gtkmm/application.h>
 #include <filesystem>
-#include <iostream>
 #include <dlfcn.h>
 
 void load_libsyspower() {
 	void* handle = dlopen("libsyspower.so", RTLD_LAZY);
 	if (!handle) {
-		std::cerr << "Cannot open library: " << dlerror() << '\n';
+		std::fprintf(stderr,"Cannot open library: %s\n", dlerror());
 		exit(1);
 	}
 
 	syspower_create_ptr = (syspower_create_func)dlsym(handle, "syspower_create");
 
 	if (!syspower_create_ptr) {
-		std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+		std::fprintf(stderr,"Cannot load symbols: %s\n", dlerror());
 		dlclose(handle);
 		exit(1);
 	}
@@ -59,7 +58,7 @@ int main(int argc, char *argv[]) {
 			case 'p':
 				config_main.position = std::stoi(optarg);
 				if (config_main.position > 4 || config_main.position < 0) {
-					std::cerr << "Invalid position value" << std::endl;
+					std::fprintf(stderr,"Invalid position value\n");
 					return 1;
 				}
 				continue;
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
 			case 'm':
 				config_main.main_monitor = std::stoi(optarg);
 				if (config_main.main_monitor < 0) {
-					std::cerr << "Invalid primary monitor value" << std::endl;
+					std::fprintf(stderr,"Invalid primary monitor value\n");
 					return 1;
 				}
 				continue;
@@ -75,26 +74,26 @@ int main(int argc, char *argv[]) {
 			case 't':
 				config_main.transition_duration = std::stoi(optarg);
 				if (config_main.transition_duration < 0 || config_main.position < 0) {
-					std::cerr << "Invalid transition duration value" << std::endl;
+					std::fprintf(stderr,"Invalid transition duration value\n");
 					return 1;
 				}
 				continue;
 
 			case 'v':
-				std::cout << "Commit: " << GIT_COMMIT_MESSAGE << std::endl;
-				std::cout << "Date: " << GIT_COMMIT_DATE << std::endl;
+				std::printf("Commit: %s\n", GIT_COMMIT_MESSAGE);
+				std::printf("Date: %s\n", GIT_COMMIT_DATE);
 				return 0;
 
 			case 'h':
 			default :
-				std::cout << "usage:" << std::endl;
-				std::cout << "  syspower [argument...]:\n" << std::endl;
-				std::cout << "arguments:" << std::endl;
-				std::cout << "  -p	Set position" << std::endl;
-				std::cout << "  -m	Set primary monitor" << std::endl;
-				std::cout << "  -t	Set revealer transition duration" << std::endl;
-				std::cout << "  -v	Prints version info" << std::endl;
-				std::cout << "  -h	Show this help message" << std::endl;
+				std::printf("usage:\n");
+				std::printf("  syspower [argument...]:\n\n");
+				std::printf("arguments:\n");
+				std::printf("  -p	Set position\n");
+				std::printf("  -m	Set primary monitor\n");
+				std::printf("  -t	Set revealer transition duration\n");
+				std::printf("  -v	Prints version info\n");
+				std::printf("  -h	Show this help message\n");
 				return 0;
 
 			case -1:
