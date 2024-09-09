@@ -1,7 +1,6 @@
 #include "functions.hpp"
 
 #include <unistd.h>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -21,10 +20,9 @@ int syspower_functions::get_dirty_pages() {
 		meminfo.close();
 		return dirtyValue;
 	}
-	else {
-		std::cerr << "Unable to open /proc/meminfo" << std::endl;
-		return -1;
-	}
+
+	std::fprintf(stderr, "Unable to open /proc/meminfo\n");;
+	return -1;
 }
 
 void syspower_functions::sync_filesystems() {
@@ -44,30 +42,34 @@ void syspower_functions::kill_child_processes() {
 	// Itterate over the output
 	while (pos != std::string::npos) {
 		size_t start = output.find(':', pos);
-		if (start != std::string::npos) {
-			size_t end = output.find_first_of(",}", start);
-			if (end != std::string::npos) {
-				std::string pid = output.substr(start + 2, end - start - 2);
-				std::string kill_command = "hyprctl dispatch closewindow pid:";
-				kill_command += pid;
+		if (start == std::string::npos)
+			continue;
 
-				// This is not really needed,
-				// Since the program itself is a layershell.
-				// But it might be helpful for when and if i get to adding
-				// support for other compositors
+		size_t end = output.find_first_of(",}", start);
+		if (end == std::string::npos)
+			continue;
 
-				// Don't kill own process
-				if (std::stoi(pid) == own_pid)
-					continue;
+		// TODO: Consider using batch
+		std::string pid = output.substr(start + 2, end - start - 2);
+		std::string kill_command = "hyprctl dispatch closewindow pid:";
+		kill_command += pid;
 
-				// TODO: Wait for the program to close
-				// Also change the system status to "Closing xyz..."
-				// And add a button to minimize the shutdown screen to take action
-				// And a button to forcefully kill the program (Skip others too)
-				int ret = system(kill_command.c_str());
-				(void)ret; // Unused variable
-			}
-		}
+		// This is not really needed,
+		// Since the program itself is a layershell.
+		// But it might be helpful for when and if i get to adding
+		// support for other compositors
+
+		// Don't kill own process
+		if (std::stoi(pid) == own_pid)
+			continue;
+
+		// TODO: Wait for the program to close
+		// Also change the system status to "Closing xyz..."
+		// And add a button to minimize the shutdown screen to take action
+		// And a button to forcefully kill the program (Skip others too)
+		int ret = system(kill_command.c_str());
+		(void)ret; // Unused variable
+
 		pos = output.find(searchString, pos + 1);
 	}
 }
