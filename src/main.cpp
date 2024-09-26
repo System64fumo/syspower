@@ -37,16 +37,16 @@ int main(int argc, char *argv[]) {
 	config_parser config(config_path);
 
 	if (config.available) {
-		std::string cfg_position = config.get_value("main", "position");
-		if (cfg_position != "empty")
+		std::string cfg_position = config.data["main"]["position"];
+		if (!cfg_position.empty())
 			config_main.position = std::stoi(cfg_position);
 
-		std::string cfg_monitor =  config.get_value("main", "monitor");
-		if (cfg_monitor != "empty")
+		std::string cfg_monitor =  config.data["main"]["monitor"];
+		if (!cfg_monitor.empty())
 			config_main.main_monitor=std::stoi(cfg_monitor);
 
-		std::string cfg_transition =  config.get_value("main", "transition-duration");
-		if (cfg_transition != "empty")
+		std::string cfg_transition =  config.data["main"]["transition-duration"];
+		if (!cfg_transition.empty())
 			config_main.transition_duration =std::stoi(cfg_transition);
 	}
 	#endif
