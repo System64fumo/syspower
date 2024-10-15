@@ -231,9 +231,9 @@ void syspower::on_button_clicked(const char &button) {
 		button_text = "Logging out...";
 	}
 	else if (button == 'c') {
-		for (const auto &window : windows) {
-			delete &window;
-		}
+		for (const auto &window : windows)
+			window->close();
+
 		close();
 		return;
 	}
