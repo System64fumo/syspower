@@ -1,11 +1,11 @@
 #include "window.hpp"
 #include "functions.hpp"
 #include "config.hpp"
-#include "css.hpp"
 
+#include <gtk4-layer-shell.h>
+#include <gtkmm/cssprovider.h>
 #include <glibmm/main.h>
 #include <filesystem>
-#include <gtk4-layer-shell.h>
 #include <thread>
 
 syspower::syspower(const config_power &cfg) {
@@ -98,16 +98,21 @@ syspower::syspower(const config_power &cfg) {
 	add_button("Logout");
 	add_button("Cancel");
 
-	// Load custom css
-	std::string style_path;
-	if (std::filesystem::exists(std::string(getenv("HOME")) + "/.config/sys64/power/style.css"))
-		style_path = std::string(getenv("HOME")) + "/.config/sys64/power/style.css";
-	else if (std::filesystem::exists("/usr/share/sys64/power/style.css"))
-		style_path = "/usr/share/sys64/power/style.css";
-	else
-		style_path = "/usr/local/share/sys64/power/style.css";
+	const std::string& style_path = "/usr/share/sys64/power/style.css";
+	const std::string& style_path_usr = std::string(getenv("HOME")) + "/.config/sys64/power/style.css";
 
-	css_loader loader(style_path, this);
+	// Load base style
+	if (std::filesystem::exists(style_path)) {
+		auto css = Gtk::CssProvider::create();
+		css->load_from_path(style_path);
+		get_style_context()->add_provider_for_display(property_display(), css, GTK_STYLE_PROVIDER_PRIORITY_USER);
+	}
+	// Load user style
+	if (std::filesystem::exists(style_path_usr)) {
+		auto css = Gtk::CssProvider::create();
+		css->load_from_path(style_path_usr);
+		get_style_context()->add_provider_for_display(property_display(), css, GTK_STYLE_PROVIDER_PRIORITY_USER);
+	}
 }
 
 void syspower::show_other_windows() {
