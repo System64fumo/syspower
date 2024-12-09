@@ -58,7 +58,7 @@
           home.file = {
             ".config/sys64/power/config.conf".text = ''
               [main]
-              position=${with cfg.settings;
+              position=${builtins.toString (with cfg.settings;
                 if position == "top"
                 then 0
                 else if position == "right"
@@ -67,9 +67,9 @@
                 then 2
                 else if position == "left"
                 then 3
-                else 4}
-              monitor=${cfg.settings.monitor}
-              transition-duration=${cfg.settings.transition-duration}
+                else 4)}
+              monitor=${builtins.toString.settings.monitor}
+              transition-duration=${builtins.toString.settings.transition-duration}
             '';
             ".config/sys64/power/style.css".text = cfg.style;
           };
