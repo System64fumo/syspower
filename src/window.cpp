@@ -96,6 +96,7 @@ syspower::syspower(const config_power &cfg) {
 	add_button("Shutdown");
 	add_button("Reboot");
 	add_button("Logout");
+	add_button("Suspend");
 	add_button("Cancel");
 
 	const std::string& style_path = "/usr/share/sys64/power/style.css";
@@ -205,13 +206,13 @@ void syspower::add_button(const std::string &label) {
 	button->get_style_context()->add_class("button_" + lowecase);
 	box_buttons.append(*button);
 	button->signal_clicked().connect([this, lowecase]() {
-		on_button_clicked(lowecase.c_str()[0]);
+		on_button_clicked(lowecase);
 	});
 }
 
-void syspower::on_button_clicked(const char &button) {
+void syspower::on_button_clicked(const std::string &button) {
 	// Figure out what we're doing
-	if (button == 's') {
+	if (button == "shutdown") {
 		if (access("/bin/systemctl", F_OK) != -1)
 			// Systemd-logind
 			strcpy(command, "systemctl poweroff");
@@ -221,7 +222,7 @@ void syspower::on_button_clicked(const char &button) {
 
 		button_text = "Shutting down...";
 	}
-	else if (button == 'r') {
+	else if (button == "reboot") {
 		if (access("/bin/systemctl", F_OK) != -1)
 			// Systemd-logind
 			strcpy(command, "systemctl reboot");
@@ -231,11 +232,19 @@ void syspower::on_button_clicked(const char &button) {
 
 		button_text = "Rebooting...";
 	}
-	else if (button == 'l') {
+	else if (button == "logout") {
 		strcpy(command, "loginctl terminate-user $USER");
 		button_text = "Logging out...";
 	}
-	else if (button == 'c') {
+	else if (button == "suspend") {
+		button_text = "Suspending...";
+		system("systemctl suspend");
+		for (const auto &window : windows)
+			window->close();
+		close();
+		return;
+	}
+	else if (button == "cancel") {
 		for (const auto &window : windows)
 			window->close();
 
