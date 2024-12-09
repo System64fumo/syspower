@@ -68,8 +68,8 @@
                 else if position == "left"
                 then 3
                 else 4)}
-              monitor=${builtins.toString.settings.monitor}
-              transition-duration=${builtins.toString.settings.transition-duration}
+              monitor=${builtins.toString cfg.settings.monitor}
+              transition-duration=${builtins.toString cfg.settings.transition-duration}
             '';
             ".config/sys64/power/style.css".text = cfg.style;
           };
