@@ -16,3 +16,34 @@ arguments:
   -v	Prints version info
   -t	Set revealer transition duration (0 = disabled)
 ```
+
+# Nix
+
+syspower can be installed on NixOS using the flake in this repository.
+
+```nix
+{
+  inputs.syspower.url = "github:System64fumo/syspower";
+
+  # in system config...
+  environment.systemPackages = [inputs.syspower.packages.x86_64-linux.default];
+}
+```
+
+It can also be configured with Home Manager:
+
+```nix
+{
+  imports = [inputs.syspower.modules.homeManager.default];
+
+  programs.syspower = {
+    enable = true;
+    settings  {
+      position = "center";
+      monitor = 0;
+      revealer-transition-duration = 1000;
+    };
+    style = builtins.readFile ./style.css;
+  }
+}
+```
