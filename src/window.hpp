@@ -37,7 +37,7 @@ class syspower : public Gtk::Window {
 
 		void action_thread();
 		void add_button(const std::string &label);
-		void on_button_clicked(const char &button);
+		void on_button_clicked(const std::string &button);
 		bool on_timer_tick();
 };
 
