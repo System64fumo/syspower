@@ -44,7 +44,7 @@
             };
           };
           style = mkOption {
-            type = (pkgs.formats.css {}).type;
+            type = types.str;
             default = builtins.readFile ./style.css;
             description = "CSS stylesheet to apply to the menu";
           };
