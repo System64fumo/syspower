@@ -16,7 +16,7 @@ class syspower : public Gtk::Window {
 	private:
 		config_power config_main;
 		double max_slider_value;
-		char command[30] = "";
+		std::string command;
 		Glib::ustring button_text;
 		sigc::connection timer_connection;
 
@@ -39,6 +39,7 @@ class syspower : public Gtk::Window {
 		void add_button(const std::string &label);
 		void on_button_clicked(const std::string &button);
 		bool on_timer_tick();
+		bool systemd(const std::string&);
 };
 
 extern "C" {
