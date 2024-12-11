@@ -192,7 +192,7 @@ void syspower::action_thread() {
 
 	// Run action
 	label_status.set_label(button_text);
-	int ret = system(command);
+	int ret = system(command.c_str());
 	(void)ret; // Unused variable
 }
 
@@ -211,29 +211,23 @@ void syspower::add_button(const std::string &label) {
 }
 
 void syspower::on_button_clicked(const std::string &button) {
+	std::string cmd = "systemctl";
+	if (!systemd(cmd))
+		cmd = "loginctl";
+
+	command += cmd;
+
 	// Figure out what we're doing
 	if (button == "shutdown") {
-		if (access("/bin/systemctl", F_OK) != -1)
-			// Systemd-logind
-			strcpy(command, "systemctl poweroff");
-		else
-			// Elogind
-			strcpy(command, "loginctl poweroff");
-
+		command +=  " poweroff";
 		button_text = "Shutting down...";
 	}
 	else if (button == "reboot") {
-		if (access("/bin/systemctl", F_OK) != -1)
-			// Systemd-logind
-			strcpy(command, "systemctl reboot");
-		else
-			// Elogind
-			strcpy(command, "loginctl reboot");
-
+		command += " reboot";
 		button_text = "Rebooting...";
 	}
 	else if (button == "logout") {
-		strcpy(command, "loginctl terminate-user $USER");
+		command += " terminate-user $USER";
 		button_text = "Logging out...";
 	}
 	else if (button == "suspend") {
@@ -242,14 +236,11 @@ void syspower::on_button_clicked(const std::string &button) {
 		for (const auto &window : windows)
 			window->close();
 		close();
-		return;
 	}
 	else if (button == "cancel") {
 		for (const auto &window : windows)
 			window->close();
-
 		close();
-		return;
 	}
 
 	std::thread thread_action(&syspower::action_thread, this);
@@ -264,6 +255,25 @@ bool syspower::on_timer_tick() {
 		progressbar_sync.set_fraction(value);
 
 	return true;
+}
+
+bool syspower::systemd(const std::string& cmd) {
+	std::string path_env_str(std::getenv("PATH"));
+	std::vector<std::string> paths;
+	size_t start = 0, end;
+
+	while ((end = path_env_str.find(':', start)) != std::string::npos) {
+		paths.emplace_back(path_env_str.substr(start, end - start));
+		start = end + 1;
+	}
+	paths.emplace_back(path_env_str.substr(start));
+
+	for (const auto& dir : paths) {
+		if (std::filesystem::exists(std::filesystem::path(dir) / cmd)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 extern "C" {
