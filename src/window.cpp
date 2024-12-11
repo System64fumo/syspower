@@ -1,6 +1,5 @@
 #include "window.hpp"
 #include "functions.hpp"
-#include "config.hpp"
 
 #include <gtk4-layer-shell.h>
 #include <gtkmm/cssprovider.h>
@@ -8,7 +7,7 @@
 #include <filesystem>
 #include <thread>
 
-syspower::syspower(const config_power &cfg) {
+syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	config_main = cfg;
 
 	// Layer shell stuff
@@ -196,7 +195,7 @@ void syspower::action_thread() {
 	(void)ret; // Unused variable
 }
 
-void syspower::add_button(const std::string &label) {
+void syspower::add_button(const std::string& label) {
 	Gtk::Button *button = Gtk::make_managed<Gtk::Button>(label);
 	std::string lowecase = label;
 	for (char& c : lowecase)
@@ -210,7 +209,7 @@ void syspower::add_button(const std::string &label) {
 	});
 }
 
-void syspower::on_button_clicked(const std::string &button) {
+void syspower::on_button_clicked(const std::string& button) {
 	std::string cmd = "systemctl";
 	if (!systemd(cmd))
 		cmd = "loginctl";
@@ -277,7 +276,7 @@ bool syspower::systemd(const std::string& cmd) {
 }
 
 extern "C" {
-	syspower *syspower_create(const config_power &cfg) {
+	syspower* syspower_create(const config_power& cfg) {
 		return new syspower(cfg);
 	}
 }
