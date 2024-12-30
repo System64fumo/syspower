@@ -3,6 +3,7 @@
 
 #include <gtk4-layer-shell.h>
 #include <gtkmm/cssprovider.h>
+#include <gtkmm/eventcontrollerkey.h>
 #include <glibmm/main.h>
 #include <filesystem>
 #include <thread>
@@ -97,6 +98,20 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	add_button("Logout");
 	add_button("Suspend");
 	add_button("Cancel");
+
+	// Key events
+	auto key_controller = Gtk::EventControllerKey::create();
+	key_controller->signal_key_pressed().connect(
+		[this](guint keyval, guint, Gdk::ModifierType) {
+			if (keyval == GDK_KEY_Escape) {
+				on_button_clicked("cancel");
+				return true;
+			}
+			return false;
+		},
+		false
+	);
+	add_controller(key_controller);
 
 	const std::string& style_path = "/usr/share/sys64/power/style.css";
 	const std::string& style_path_usr = std::string(getenv("HOME")) + "/.config/sys64/power/style.css";
