@@ -15,4 +15,5 @@ arguments:
   -m	Set primary monitor (If you have multiple monitors)
   -v	Prints version info
   -t	Set revealer transition duration (0 = disabled)
+  -k	Set a hotkey (name,action - e.g. x,cancel)
 ```

@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
 				std::printf("  -p	Set position\n");
 				std::printf("  -m	Set primary monitor\n");
 				std::printf("  -t	Set revealer transition duration\n");
+				std::printf("  -k	Set a hotkey (name,action - e.g. x,cancel)\n");
 				std::printf("  -v	Prints version info\n");
 				std::printf("  -h	Show this help message\n");
 				return 0;
