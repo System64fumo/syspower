@@ -12,6 +12,12 @@ struct config_power {
 	int position = 4;
 	int main_monitor = 0;
 	int transition_duration = 1000;
-	std::unordered_map<guint, std::string> hotkeys;
+	std::unordered_map<guint, std::string> hotkeys = {
+		{GDK_KEY_u, "shutdown"},
+		{GDK_KEY_r, "reboot"},
+		{GDK_KEY_l, "logout"},
+		{GDK_KEY_s, "suspend"},
+		{GDK_KEY_c, "cancel"}
+	};
 };
 
