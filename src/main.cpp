@@ -4,6 +4,7 @@
 #include "git_info.hpp"
 
 #include <gtkmm/application.h>
+#include <gtkmm.h>
 #include <filesystem>
 #include <dlfcn.h>
 
@@ -48,13 +49,22 @@ int main(int argc, char *argv[]) {
 		std::string cfg_transition =  config.data["main"]["transition-duration"];
 		if (!cfg_transition.empty())
 			config_main.transition_duration =std::stoi(cfg_transition);
+		int n_hotkeys = std::stoi(config.data["main"]["n_hotkeys"]);
+		for (int i = 0; i < n_hotkeys; ++i) {
+			std::string hotkey = config.data["main"]["hotkey" + std::to_string(i + 1)];
+			size_t comma_pos = hotkey.find(',');
+			std::string keyname = hotkey.substr(0, comma_pos);
+			guint keyval = gdk_keyval_from_name(keyname.c_str());
+			hotkey.erase(0, comma_pos + 1);
+			config_main.hotkeys[keyval] = hotkey;
+		}
 	}
 	#endif
 
 	// Read launch arguments
 	#ifdef CONFIG_RUNTIME
 	while (true) {
-		switch(getopt(argc, argv, "p:dm:dt:dvh")) {
+		switch(getopt(argc, argv, "p:dm:dt:dvhk:")) {
 			case 'p':
 				config_main.position = std::stoi(optarg);
 				if (config_main.position > 4 || config_main.position < 0) {
@@ -83,7 +93,16 @@ int main(int argc, char *argv[]) {
 				std::printf("Commit: %s\n", GIT_COMMIT_MESSAGE);
 				std::printf("Date: %s\n", GIT_COMMIT_DATE);
 				return 0;
-
+			case 'k':
+				{
+					std::string hotkey = optarg;
+					size_t comma_pos = hotkey.find(',');
+					std::string keyname = hotkey.substr(0, comma_pos);
+					guint keyval = gdk_keyval_from_name(keyname.c_str());
+					hotkey.erase(0, comma_pos + 1);
+					config_main.hotkeys[keyval] = hotkey;
+				}
+				continue;
 			case 'h':
 			default :
 				std::printf("usage:\n");
@@ -92,6 +111,7 @@ int main(int argc, char *argv[]) {
 				std::printf("  -p	Set position\n");
 				std::printf("  -m	Set primary monitor\n");
 				std::printf("  -t	Set revealer transition duration\n");
+				std::printf("  -k	Set a hotkey (name,action - e.g. x,cancel)\n");
 				std::printf("  -v	Prints version info\n");
 				std::printf("  -h	Show this help message\n");
 				return 0;

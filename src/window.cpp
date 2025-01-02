@@ -103,8 +103,8 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	auto key_controller = Gtk::EventControllerKey::create();
 	key_controller->signal_key_pressed().connect(
 		[this](guint keyval, guint, Gdk::ModifierType) {
-			if (keyval == GDK_KEY_Escape) {
-				on_button_clicked("cancel");
+			if (!config_main.hotkeys[keyval].empty()) {
+				on_button_clicked(config_main.hotkeys[keyval]);
 				return true;
 			}
 			return false;
@@ -212,15 +212,15 @@ void syspower::action_thread() {
 
 void syspower::add_button(const std::string& label) {
 	Gtk::Button *button = Gtk::make_managed<Gtk::Button>(label);
-	std::string lowecase = label;
-	for (char& c : lowecase)
+	std::string lowercase = label;
+	for (char& c : lowercase)
 		c = std::tolower(static_cast<unsigned char>(c));
 	button->set_size_request(300, 75);
 	button->set_margin(5);
-	button->get_style_context()->add_class("button_" + lowecase);
+	button->get_style_context()->add_class("button_" + lowercase);
 	box_buttons.append(*button);
-	button->signal_clicked().connect([this, lowecase]() {
-		on_button_clicked(lowecase);
+	button->signal_clicked().connect([this, lowercase]() {
+		on_button_clicked(lowercase);
 	});
 }
 
