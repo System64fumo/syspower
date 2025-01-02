@@ -103,10 +103,7 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	auto key_controller = Gtk::EventControllerKey::create();
 	key_controller->signal_key_pressed().connect(
 		[this](guint keyval, guint, Gdk::ModifierType) {
-			if (keyval == GDK_KEY_Escape) {
-				on_button_clicked("cancel");
-				return true;
-			} else if (!config_main.hotkeys[keyval].empty()) {
+			if (!config_main.hotkeys[keyval].empty()) {
 				on_button_clicked(config_main.hotkeys[keyval]);
 				return true;
 			}

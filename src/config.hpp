@@ -17,7 +17,8 @@ struct config_power {
 		{GDK_KEY_r, "reboot"},
 		{GDK_KEY_l, "logout"},
 		{GDK_KEY_s, "suspend"},
-		{GDK_KEY_c, "cancel"}
+		{GDK_KEY_c, "cancel"},
+		{GDK_KEY_Escape, "cancel"}
 	};
 };
 
