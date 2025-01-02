@@ -4,6 +4,7 @@
 #include "git_info.hpp"
 
 #include <gtkmm/application.h>
+#include <gtkmm.h>
 #include <filesystem>
 #include <dlfcn.h>
 
@@ -48,6 +49,15 @@ int main(int argc, char *argv[]) {
 		std::string cfg_transition =  config.data["main"]["transition-duration"];
 		if (!cfg_transition.empty())
 			config_main.transition_duration =std::stoi(cfg_transition);
+		int n_hotkeys = std::stoi(config.data["main"]["n_hotkeys"]);
+		for (int i = 0; i < n_hotkeys; ++i) {
+			std::string hotkey = config.data["main"]["hotkey" + std::to_string(i + 1)];
+			size_t comma_pos = hotkey.find(',');
+			std::string keyname = hotkey.substr(0, comma_pos);
+			guint keyval = gdk_keyval_from_name(keyname.c_str());
+			hotkey.erase(0, comma_pos + 1);
+			config_main.hotkeys[keyval] = hotkey;
+		}
 	}
 	#endif
 
