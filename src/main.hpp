@@ -2,8 +2,7 @@
 #include "config.hpp"
 #include "window.hpp"
 
-config_power config_main;
-typedef syspower* (*syspower_create_func)(const config_power &cfg);
+typedef syspower* (*syspower_create_func)(const std::map<std::string, std::map<std::string, std::string>>&);
 typedef void (*syspower_show_windows_func)(syspower*);
 
 syspower_create_func syspower_create_ptr;

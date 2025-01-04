@@ -4,7 +4,6 @@
 #include "git_info.hpp"
 
 #include <gtkmm/application.h>
-#include <gtkmm.h>
 #include <filesystem>
 #include <dlfcn.h>
 
@@ -27,82 +26,66 @@ void load_libsyspower() {
 int main(int argc, char *argv[]) {
 	// Load the config
 	#ifdef CONFIG_FILE
+	// Load the config
 	std::string config_path;
-	if (std::filesystem::exists(std::string(getenv("HOME")) + "/.config/sys64/power/config.conf"))
-		config_path = std::string(getenv("HOME")) + "/.config/sys64/power/config.conf";
-	else if (std::filesystem::exists("/usr/share/sys64/power/config.conf"))
+	std::map<std::string, std::map<std::string, std::string>> config;
+	std::map<std::string, std::map<std::string, std::string>> config_usr;
+
+	bool cfg_sys = std::filesystem::exists("/usr/share/sys64/power/config.conf");
+	bool cfg_sys_local = std::filesystem::exists("/usr/local/share/sys64/power/config.conf");
+	bool cfg_usr = std::filesystem::exists(std::string(getenv("HOME")) + "/.config/sys64/power/config.conf");
+
+	// Load default config
+	if (cfg_sys)
 		config_path = "/usr/share/sys64/power/config.conf";
-	else
+	else if (cfg_sys_local)
 		config_path = "/usr/local/share/sys64/power/config.conf";
+	else
+		std::fprintf(stderr, "No default config found, Things will get funky!\n");
 
-	config_parser config(config_path);
+	config = config_parser(config_path).data;
 
-	if (config.available) {
-		std::string cfg_position = config.data["main"]["position"];
-		if (!cfg_position.empty())
-			config_main.position = std::stoi(cfg_position);
+	// Load user config
+	if (cfg_usr)
+		config_path = std::string(getenv("HOME")) + "/.config/sys64/power/config.conf";
+	else
+		std::fprintf(stderr, "No user config found\n");
 
-		std::string cfg_monitor =  config.data["main"]["monitor"];
-		if (!cfg_monitor.empty())
-			config_main.main_monitor=std::stoi(cfg_monitor);
+	config_usr = config_parser(config_path).data;
 
-		std::string cfg_transition =  config.data["main"]["transition-duration"];
-		if (!cfg_transition.empty())
-			config_main.transition_duration =std::stoi(cfg_transition);
-		int n_hotkeys = std::stoi(config.data["main"]["n_hotkeys"]);
-		for (int i = 0; i < n_hotkeys; ++i) {
-			std::string hotkey = config.data["main"]["hotkey" + std::to_string(i + 1)];
-			size_t comma_pos = hotkey.find(',');
-			std::string keyname = hotkey.substr(0, comma_pos);
-			guint keyval = gdk_keyval_from_name(keyname.c_str());
-			hotkey.erase(0, comma_pos + 1);
-			config_main.hotkeys[keyval] = hotkey;
-		}
+	// Merge configs
+	for (const auto& [key, nested_map] : config_usr)
+		for (const auto& [inner_key, inner_value] : nested_map)
+			config[key][inner_key] = inner_value;
+
+	// Sanity check
+	if (!(cfg_sys || cfg_sys_local || cfg_usr)) {
+		std::fprintf(stderr, "No config available, Something ain't right here.");
+		return 1;
 	}
 	#endif
 
 	// Read launch arguments
 	#ifdef CONFIG_RUNTIME
 	while (true) {
-		switch(getopt(argc, argv, "p:dm:dt:dvhk:")) {
+		switch(getopt(argc, argv, "p:sm:st:sk:svh")) {
 			case 'p':
-				config_main.position = std::stoi(optarg);
-				if (config_main.position > 4 || config_main.position < 0) {
-					std::fprintf(stderr,"Invalid position value\n");
-					return 1;
-				}
+				config["main"]["position"] = optarg;
 				continue;
 
 			case 'm':
-				config_main.main_monitor = std::stoi(optarg);
-				if (config_main.main_monitor < 0) {
-					std::fprintf(stderr,"Invalid primary monitor value\n");
-					return 1;
-				}
+				config["main"]["monitor"] = optarg;
 				continue;
 
 			case 't':
-				config_main.transition_duration = std::stoi(optarg);
-				if (config_main.transition_duration < 0 || config_main.position < 0) {
-					std::fprintf(stderr,"Invalid transition duration value\n");
-					return 1;
-				}
+				config["main"]["transition-duration"] = optarg;
 				continue;
 
 			case 'v':
 				std::printf("Commit: %s\n", GIT_COMMIT_MESSAGE);
 				std::printf("Date: %s\n", GIT_COMMIT_DATE);
 				return 0;
-			case 'k':
-				{
-					std::string hotkey = optarg;
-					size_t comma_pos = hotkey.find(',');
-					std::string keyname = hotkey.substr(0, comma_pos);
-					guint keyval = gdk_keyval_from_name(keyname.c_str());
-					hotkey.erase(0, comma_pos + 1);
-					config_main.hotkeys[keyval] = hotkey;
-				}
-				continue;
+
 			case 'h':
 			default :
 				std::printf("usage:\n");
@@ -111,7 +94,6 @@ int main(int argc, char *argv[]) {
 				std::printf("  -p	Set position\n");
 				std::printf("  -m	Set primary monitor\n");
 				std::printf("  -t	Set revealer transition duration\n");
-				std::printf("  -k	Set a hotkey (name,action - e.g. x,cancel)\n");
 				std::printf("  -v	Prints version info\n");
 				std::printf("  -h	Show this help message\n");
 				return 0;
@@ -127,7 +109,7 @@ int main(int argc, char *argv[]) {
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("funky.sys64.syspower");
 
 	load_libsyspower();
-	syspower *window = syspower_create_ptr(config_main);
+	syspower *window = syspower_create_ptr(config);
 
 	// Add window
 	app->signal_startup().connect([&]() {

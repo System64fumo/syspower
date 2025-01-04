@@ -10,11 +10,11 @@
 
 class syspower : public Gtk::Window {
 	public:
-		syspower(const config_power&);
+		syspower(const std::map<std::string, std::map<std::string, std::string>>&);
 		void show_other_windows();
 
 	private:
-		config_power config_main;
+		std::map<std::string, std::map<std::string, std::string>> config_main;
 		double max_slider_value;
 		std::string command;
 		Glib::ustring button_text;
@@ -43,6 +43,6 @@ class syspower : public Gtk::Window {
 };
 
 extern "C" {
-	syspower *syspower_create(const config_power&);
+	syspower *syspower_create(const std::map<std::string, std::map<std::string, std::string>>&);
 }
 
