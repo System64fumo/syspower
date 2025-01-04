@@ -8,7 +8,7 @@
 #include <filesystem>
 #include <thread>
 
-syspower::syspower(const config_power& cfg) : config_main(cfg) {
+syspower::syspower(const std::map<std::string, std::map<std::string, std::string>>& cfg) : config_main(cfg) {
 	config_main = cfg;
 
 	// Layer shell stuff
@@ -36,7 +36,7 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 
 	Gtk::RevealerTransitionType transition_type = Gtk::RevealerTransitionType::SLIDE_UP;
 
-	switch (config_main.position) {
+	switch (std::stoi(config_main["main"]["position"])) {
 		case 0: // Top
 			box_layout.set_valign(Gtk::Align::START);
 			box_layout.set_halign(Gtk::Align::CENTER);
@@ -73,13 +73,13 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	box_layout.append(label_status);
 
 	// Revealer
-	if (config_main.transition_duration != 0) {
+	if (std::stoi(config_main["main"]["transition-duration"]) != 0) {
 		box_layout.append(revealer_box);
 		revealer_box.set_child(box_buttons);
 		revealer_box.set_transition_type(transition_type);
 		revealer_box.set_transition_duration(0);
 		revealer_box.set_reveal_child(true);
-		revealer_box.set_transition_duration(config_main.transition_duration);
+		revealer_box.set_transition_duration(std::stoi(config_main["main"]["transition-duration"]));
 	}
 	else
 		box_layout.append(box_buttons);
@@ -103,8 +103,15 @@ syspower::syspower(const config_power& cfg) : config_main(cfg) {
 	auto key_controller = Gtk::EventControllerKey::create();
 	key_controller->signal_key_pressed().connect(
 		[this](guint keyval, guint, Gdk::ModifierType) {
-			if (!config_main.hotkeys[keyval].empty()) {
-				on_button_clicked(config_main.hotkeys[keyval]);
+			std::string unicode_char = std::string(1, static_cast<char>(gdk_keyval_to_unicode(keyval)));
+			// TODO: This is temporary until custom button support is added
+			if (!config_main["hotkeys"][unicode_char].empty()) {
+				on_button_clicked(config_main["hotkeys"][unicode_char]);
+				return true;
+			}
+			// TODO: Somehow reuse code above for this in the laziest way possible
+			else if (keyval == 0xff1b) {
+				on_button_clicked("cancel");
 				return true;
 			}
 			return false;
@@ -134,17 +141,17 @@ void syspower::show_other_windows() {
 	// Get all monitors
 	display = gdk_display_get_default();
 	monitors = gdk_display_get_monitors(display);
-	gtk_layer_set_monitor(gobj(), GDK_MONITOR(g_list_model_get_item(monitors, config_main.main_monitor)));
+	gtk_layer_set_monitor(gobj(), GDK_MONITOR(g_list_model_get_item(monitors, std::stoi(config_main["main"]["monitor"]))));
 	show();
 
 	int monitorCount = g_list_model_get_n_items(monitors);
 
-	if (config_main.main_monitor >= monitorCount)
-		config_main.main_monitor = monitorCount - 1;
+	if (std::stoi(config_main["main"]["monitor"]) >= monitorCount)
+		config_main["main"]["monitor"] = std::to_string(monitorCount - 1);
 
 	for (int i = 0; i < monitorCount; ++i) {
 		// Ignore primary monitor
-		if (i == config_main.main_monitor)
+		if (i == std::stoi(config_main["main"]["monitor"]))
 			continue;
 
 		GdkMonitor *monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
@@ -171,9 +178,9 @@ void syspower::show_other_windows() {
 
 void syspower::action_thread() {
 	// Revealer
-	if (config_main.transition_duration != 0) {
+	if (std::stoi(config_main["main"]["transition-duration"]) != 0) {
 		revealer_box.set_reveal_child(false);
-		usleep(config_main.transition_duration * 1000);
+		usleep(std::stoi(config_main["main"]["transition-duration"]) * 1000);
 		revealer_box.set_visible(false);
 	}
 	else
@@ -292,7 +299,7 @@ bool syspower::systemd(const std::string& cmd) {
 }
 
 extern "C" {
-	syspower* syspower_create(const config_power& cfg) {
+	syspower* syspower_create(const std::map<std::string, std::map<std::string, std::string>>& cfg) {
 		return new syspower(cfg);
 	}
 }
