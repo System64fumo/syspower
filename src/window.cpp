@@ -255,6 +255,7 @@ void syspower::on_button_clicked(const std::string& button) {
 		for (const auto &window : windows)
 			window->close();
 		close();
+		return;
 	}
 
 	std::thread thread_action(&syspower::action_thread, this);
