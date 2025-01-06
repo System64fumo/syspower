@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 	// Read launch arguments
 	#ifdef CONFIG_RUNTIME
 	while (true) {
-		switch(getopt(argc, argv, "p:sm:st:sk:svh")) {
+		switch(getopt(argc, argv, "p:m:t:vh")) {
 			case 'p':
 				config["main"]["position"] = optarg;
 				continue;
