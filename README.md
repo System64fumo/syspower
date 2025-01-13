@@ -1,6 +1,7 @@
 # Syspower
 syspower is a basic power menu and shutdown screen written in gtkmm4<br>
 ![preview](https://github.com/System64fumo/syspower/blob/main/preview.gif "preview")
+[![Packaging status](https://repology.org/badge/vertical-allrepos/syspower.svg)](https://repology.org/project/syspower/versions)
 
 For now this only supports Hyprland.
 
