@@ -97,6 +97,7 @@ syspower::syspower(const std::map<std::string, std::map<std::string, std::string
 	add_button("Reboot");
 	add_button("Logout");
 	add_button("Suspend");
+	add_button("Hibernate");
 	add_button("Cancel");
 
 	// Key events
@@ -254,6 +255,13 @@ void syspower::on_button_clicked(const std::string& button) {
 	else if (button == "suspend") {
 		button_text = "Suspending...";
 		system("systemctl suspend");
+		for (const auto &window : windows)
+			window->close();
+		close();
+	}
+	else if (button == "hibernate") {
+		button_text = "Hibernating...";
+		system("systemctl hibernate");
 		for (const auto &window : windows)
 			window->close();
 		close();
