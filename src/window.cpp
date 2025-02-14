@@ -254,7 +254,14 @@ void syspower::on_button_clicked(const std::string& button) {
 	}
 	else if (button == "suspend") {
 		button_text = "Suspending...";
-		system("systemctl suspend");
+		system((cmd + " suspend").c_str());
+		for (const auto &window : windows)
+			window->close();
+		close();
+	}
+	else if (button == "hibernate") {
+		button_text = "Hibernating...";
+		system((cmd + " hibernate").c_str());
 		for (const auto &window : windows)
 			window->close();
 		close();
