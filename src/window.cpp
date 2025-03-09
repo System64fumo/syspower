@@ -249,7 +249,7 @@ void syspower::on_button_clicked(const std::string& button) {
 		button_text = "Rebooting...";
 	}
 	else if (button == "logout") {
-		command += " exit";
+		command += " loginctl terminate-user";
 		// idk how to compile this so i cant test it but its worth a shot
 		button_text = "Logging out...";
 	}
