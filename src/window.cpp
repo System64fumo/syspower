@@ -213,7 +213,21 @@ void syspower::action_thread() {
 	timer_connection.disconnect();
 
 	// Run action
+	usleep(100 * 1000);
 	label_status.set_label(button_text);
+	Glib::signal_idle().connect([this]() {
+		sleep(15); // Timeout
+		label_status.set_label("This seems to be taking longer than usual..");
+		auto children = box_buttons.get_children();
+		for (auto child : children)
+			child->set_visible(false);
+
+		children.back()->set_visible(true);
+		revealer_box.set_visible(true);
+		revealer_box.set_reveal_child(true);
+		box_buttons.set_visible(true);
+		return false;
+	});
 	int ret = system(command.c_str());
 	(void)ret; // Unused variable
 }
