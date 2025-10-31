@@ -35,6 +35,7 @@ void syspower_functions::kill_child_processes() {
 	std::string command = "hyprctl clients -j";
 	std::string output = executeCommand(command);
 	pid_t own_pid = getpid();
+	pid_t parent_pid = getppid();
 
 	std::string searchString = "pid";
 	size_t pos = output.find(searchString);
@@ -59,8 +60,8 @@ void syspower_functions::kill_child_processes() {
 		// But it might be helpful for when and if i get to adding
 		// support for other compositors
 
-		// Don't kill own process
-		if (std::stoi(pid) == own_pid)
+		// Don't kill own process or parent
+		if (std::stoi(pid) == own_pid || std::stoi(pid) == parent_pid)
 			continue;
 
 		// TODO: Wait for the program to close
