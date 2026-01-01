@@ -92,13 +92,53 @@ syspower::syspower(const std::map<std::string, std::map<std::string, std::string
 	progressbar_sync.set_size_request(300, -1);
 	progressbar_sync.set_visible(false);
 
-	// Button shenanigans
-	add_button("Shutdown");
-	add_button("Reboot");
-	add_button("Logout");
-	add_button("Suspend");
-	add_button("Hibernate");
-	add_button("Cancel");
+	// TODO: Add custom button support
+	std::string buttons = config_main["main"]["buttons"];
+	std::vector<std::string> button_names;
+	std::stringstream ss(buttons);
+	std::string button;
+
+	while (std::getline(ss, button, ',')) {
+		button.erase(0, button.find_first_not_of(" \t\n\r\f\v"));
+		button.erase(button.find_last_not_of(" \t\n\r\f\v") + 1);
+		
+		if (!button.empty()) {
+			button_names.push_back(button);
+		}
+	}
+
+	std::unordered_map<std::string, std::string> button_map = {
+		{"shutdown", "Shutdown"},
+		{"reboot", "Reboot"},
+		{"logout", "Logout"},
+		{"suspend", "Suspend"},
+		{"hibernate", "Hibernate"},
+		{"cancel", "Cancel"}
+	};
+
+	for (const auto& btn_name : button_names) {
+		std::string lowercase_name = btn_name;
+		std::transform(lowercase_name.begin(), lowercase_name.end(), lowercase_name.begin(), ::tolower);
+		
+		if (button_map.find(lowercase_name) != button_map.end()) {
+			add_button(button_map[lowercase_name]);
+		}
+	}
+
+	// Always add Cancel button at the end if not already added
+	bool has_cancel = false;
+	for (const auto& btn_name : button_names) {
+		std::string lowercase_name = btn_name;
+		std::transform(lowercase_name.begin(), lowercase_name.end(), lowercase_name.begin(), ::tolower);
+		if (lowercase_name == "cancel") {
+			has_cancel = true;
+			break;
+		}
+	}
+
+	if (!has_cancel) {
+		add_button("Cancel");
+	}
 
 	// Key events
 	auto key_controller = Gtk::EventControllerKey::create();
@@ -178,6 +218,8 @@ void syspower::show_other_windows() {
 }
 
 void syspower::action_thread() {
+	add_css_class("in_action");
+
 	// Revealer
 	if (std::stoi(config_main["main"]["transition-duration"]) != 0) {
 		revealer_box.set_reveal_child(false);
